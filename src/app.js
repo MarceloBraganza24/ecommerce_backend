@@ -6,6 +6,7 @@ import passport from "passport";
 import { addLogger } from './utils/logger.js';
 import cookieParser from 'cookie-parser';
 import config from "./config/config.js";
+import path from 'path';
 
 import UsersRouter from "./routes/users.router.js";
 import SessionsRouter from "./routes/sessions.router.js";
@@ -22,6 +23,7 @@ app.use(express.json({ type: 'application/json' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 initializePassport();
 app.use(passport.initialize());

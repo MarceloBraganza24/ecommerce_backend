@@ -7,9 +7,10 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const fileName = `${Date.now()}-${file.fieldname}${ext}`;
-    cb(null, fileName);
+    // Generás un nombre único para cada imagen
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    cb(null, `${uniqueSuffix}${extension}`);
   }
 });
 

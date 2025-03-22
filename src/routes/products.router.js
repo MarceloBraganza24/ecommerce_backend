@@ -5,10 +5,11 @@ import uploader from "../utils/upload.js";
 
 export default class ProductsRouter extends Router {
     init() {
-        this.get('/', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM,accessRolesEnum.USER], passportStrategiesEnum.JWT, getAll);
+        this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAll);
         this.get('/:pid', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM,accessRolesEnum.USER], passportStrategiesEnum.JWT, getById);
-        this.post('/', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM,accessRolesEnum.USER], passportStrategiesEnum.JWT, uploader.array('images', 6), save);
-        this.put('/:pid', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM,accessRolesEnum.USER], passportStrategiesEnum.JWT, update);
-        this.delete('/:pid', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM,accessRolesEnum.USER], passportStrategiesEnum.JWT, eliminate);
+        /* this.post('/', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM,accessRolesEnum.USER], passportStrategiesEnum.JWT, uploader.array('images', 6), save); */
+        this.post('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, uploader.array('images', 6), save);
+        this.put('/:pid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, uploader.array('images', 6), update);
+        this.delete('/:pid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, eliminate);
     }
 }

@@ -5,7 +5,8 @@ const productsCollection = 'products';
 
 const productsSchema = new mongoose.Schema({
     images: {
-        type: Array,
+        type: [String],
+        default: [],
         required: true
     },
     title: {
@@ -24,21 +25,13 @@ const productsSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    size: {
-        type: Array,
-        required: true
-    },
-    color: {
-        type: Array,
-        required: true
-    },
-    state: {
-        type: String,
-        required: true
-    },
     category: {
         type: String,
         required: true
+    },
+    camposExtras: {
+        type: Map,       // Almacena clave-valor dinámicamente
+        of: String
     }
 });
 
