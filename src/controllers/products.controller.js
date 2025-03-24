@@ -32,7 +32,7 @@ const getById = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const { title,description,price,stock,category } = req.body;
+        const { title,description,price,stock,state,category } = req.body;
         const images = req.files;
 
         let propiedades = {};
@@ -46,7 +46,7 @@ const save = async (req, res) => {
         //console.log(propiedades);
 
         // Validaciones
-        if (!title || !description || !price || !stock || !category || !images || images.length === 0) {
+        if (!title || !description || !price || !stock || !state || !category || !images || images.length === 0) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
@@ -58,6 +58,7 @@ const save = async (req, res) => {
             description,
             price,
             stock,
+            state,
             category,
             camposExtras: propiedades
         });
@@ -69,47 +70,12 @@ const save = async (req, res) => {
     }
 };
 
-
-/* const update = async (req, res) => {
-    try {
-        const { pid } = req.params;
-        const { title, description, price, stock, category, propiedades, imagenesAnteriores } = req.body;
-
-        const propiedadesParsed = JSON.parse(propiedades);
-        const imagenesAnterioresParsed = JSON.parse(imagenesAnteriores);
-        const imagenesAnterioresConPrefijo = imagenesAnterioresParsed.map(img => img.startsWith('uploads/') ? img : `uploads/${img}`);
-
-        const nuevasImagenes = req.files.map(file => `uploads/${file.filename}`);
-        const imagenesFinales = [...imagenesAnterioresConPrefijo, ...nuevasImagenes];
-        
-        const updatedProduct = await productsService.update(pid, {
-            title,
-            description,
-            price,
-            stock,
-            category,
-            propiedades: propiedadesParsed,
-            images: imagenesFinales
-        });
-
-        if (!updatedProduct) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
-
-        //await productsService.update(pid, productToReplace);
-
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-} */
-
 const update = async (req, res) => {
     try {
         const { pid } = req.params;
     
         // Campos de texto normales
-        const { title, description, price, stock, category, propiedades, imagenesAnteriores } = req.body;
+        const { title, description, price, stock, state, category, propiedades, imagenesAnteriores } = req.body;
 
         const propiedadesParsed = JSON.parse(propiedades);
         const imagenesAnterioresParsed = JSON.parse(imagenesAnteriores);
@@ -125,8 +91,9 @@ const update = async (req, res) => {
             description,
             price,
             stock,
+            state,
             category,
-            propiedades: propiedadesParsed,
+            camposExtras: propiedadesParsed,
             images: imagenesFinales
         });
 

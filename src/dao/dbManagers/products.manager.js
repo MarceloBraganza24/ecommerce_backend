@@ -9,7 +9,7 @@ export default class Products {
         return product; 
     }
     getAll = async (page) => {
-        const products = await productsModel.paginate({}, {limit: 5, page, lean: true});
+        const products = await productsModel.paginate({}, {limit: 25, page, lean: true});
         return products; 
     }
     save = async (product) => {

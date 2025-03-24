@@ -11,12 +11,14 @@ import path from 'path';
 import UsersRouter from "./routes/users.router.js";
 import SessionsRouter from "./routes/sessions.router.js";
 import ProductsRouter from "./routes/products.router.js";
+import CategoriesRouter from "./routes/categories.router.js";
 
 const app = express();
 
 const usersRouter = new UsersRouter();
 const sessionsRouter = new SessionsRouter();
 const productsRouter = new ProductsRouter();
+const categoriesRouter = new CategoriesRouter();
 
 app.use(addLogger);
 app.use(express.json({ type: 'application/json' }));
@@ -31,5 +33,6 @@ app.use(passport.initialize());
 app.use('/api/users', usersRouter.getRouter());
 app.use('/api/sessions', sessionsRouter.getRouter());
 app.use('/api/products', productsRouter.getRouter());
+app.use('/api/categories', categoriesRouter.getRouter());
 
 app.listen(config.port, () => console.log(`Server running on port ${config.port}`))
