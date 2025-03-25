@@ -1,5 +1,6 @@
 import CategoriesRepository from '../repositories/categories.repository.js';
 import { Categories } from '../dao/factory.js';
+import { CategoryExists } from '../utils/custom.exceptions.js';
 
 const categoriesDao = new Categories();
 const categoriesRepository = new CategoriesRepository(categoriesDao);
@@ -13,6 +14,11 @@ const getById = async (id) => {
     return category;
 }
 const save = async (name, category_datetime) => {
+    const categories = await categoriesRepository.getAll();
+    const exist = categories.find(category => category.name == name)
+    if(exist) {
+        throw new CategoryExists('There is already a category with that name');
+    }
     const categorySaved = await categoriesRepository.save(name, category_datetime);
     return categorySaved;
 }

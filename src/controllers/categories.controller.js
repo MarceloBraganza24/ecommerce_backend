@@ -1,4 +1,5 @@
 import * as categoriesService from '../services/categories.service.js';
+import { CategoryExists } from '../utils/custom.exceptions.js';
 
 const getAll = async (req, res) => {
     try {
@@ -27,6 +28,9 @@ const save = async (req, res) => {
         const category = await categoriesService.save(name, category_datetime);
         res.sendSuccessNewResourse(category);
     } catch (error) {
+        if(error instanceof CategoryExists) {
+            return res.sendClientError(error.message);
+        }
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }

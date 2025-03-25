@@ -8,10 +8,18 @@ export default class Products {
         const product = await productsModel.findById(pid);
         return product; 
     }
-    getAll = async (page) => {
-        const products = await productsModel.paginate({}, {limit: 25, page, lean: true});
+    getAll = async () => {
+        const products = await productsModel.find().lean();
         return products; 
     }
+    getAllByPage = async (query, { page, limit }) => {
+        const products = await productsModel.paginate(query, { page, limit });
+        return products; 
+    }
+    /* getAllByPage = async (page) => {
+        const products = await productsModel.paginate({}, {limit: 25, page, lean: true});
+        return products; 
+    } */
     save = async (product) => {
         const productSaved = await productsModel.create(product);
         return productSaved;

@@ -6,10 +6,18 @@ export default class ProductsRepository {
         const product = await this.dao.getById(pid);
         return product;
     }
-    getAll = async(page) => {
-        const products = await this.dao.getAll(page);
+    getAll = async() => {
+        const products = await this.dao.getAll();
         return products;
     }
+    getAllByPage = async(query, { page, limit }) => {
+        const products = await this.dao.getAllByPage(query, { page, limit });
+        return products;
+    }
+    /* getAllByPage = async(page) => {
+        const products = await this.dao.getAllByPage(page);
+        return products;
+    } */
     save = async(product) => {
         const productSaved = await this.dao.save(product);
         return productSaved;
