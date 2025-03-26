@@ -53,3 +53,9 @@ export class ProductExists extends Error {
         this.name = this.constructor.name;
     }
 }
+export class DeliveryFormExists extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
