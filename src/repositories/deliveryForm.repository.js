@@ -14,6 +14,10 @@ export default class DeliveryFormRepository {
         const deliveryFormSaved = await this.dao.save(deliveryForm);
         return deliveryFormSaved;
     }
+    update = async(id, deliveryForm) => {
+        const deliveryFormUpdated = await this.dao.update(id, deliveryForm);
+        return deliveryFormUpdated;
+    }
     eliminate = async(id) => {
         const deliveryFormEliminated = await this.dao.eliminate(id);
         return deliveryFormEliminated;

@@ -13,6 +13,10 @@ export default class deliveryFormDao {
         const deliveryFormSaved = await deliveryFormModel.create(deliveryForm);
         return deliveryFormSaved;
     }
+    update = async (id, deliveryForm) => {
+        const deliveryFormUpdated = await deliveryFormModel.updateOne({ _id: id }, deliveryForm);
+        return deliveryFormUpdated;
+    }
     eliminate = async (cid) => {
         const deliveryFormEliminated = await deliveryFormModel.deleteOne({ _id: cid });
         return deliveryFormEliminated;

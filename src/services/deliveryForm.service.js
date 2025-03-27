@@ -22,6 +22,10 @@ const save = async (deliveryForm) => {
     const deliveryFormSaved = await deliveryFormRepository.save(deliveryForm);
     return deliveryFormSaved;
 }
+const update = async(id, deliveryForm) => {
+    const deliveryFormUpdated = await deliveryFormRepository.update(id, deliveryForm);
+    return deliveryFormUpdated;
+}
 const eliminate = async(id) => {
     const deliveryFormEliminated = await deliveryFormRepository.eliminate(id);
     return deliveryFormEliminated;
@@ -31,5 +35,6 @@ export {
     getAll,
     getById,
     save,
+    update,
     eliminate
 }
