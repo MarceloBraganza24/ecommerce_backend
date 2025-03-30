@@ -59,3 +59,15 @@ export class DeliveryFormExists extends Error {
         this.name = this.constructor.name;
     }
 }
+export class SellerAddressExists extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
+export class CouponExists extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
