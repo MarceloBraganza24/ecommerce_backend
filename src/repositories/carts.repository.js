@@ -10,8 +10,12 @@ export default class CartsRepository {
         const cart = await this.dao.getById(cid);
         return cart;
     }
-    save = async(cart) => {
-        const cartSaved = await this.dao.save(cart);
+    getByUserId = async(id) => {
+        const cart = await this.dao.getByUserId(id);
+        return cart;
+    }
+    save = async(user_id,products) => {
+        const cartSaved = await this.dao.save(user_id,products);
         return cartSaved;
     }
     update = async(cid, cartToReplace) => {

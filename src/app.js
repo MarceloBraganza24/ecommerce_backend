@@ -15,6 +15,7 @@ import CategoriesRouter from "./routes/categories.router.js";
 import DeliveryFormRouter from "./routes/deliveryForm.router.js";
 import SellerAddressRouter from "./routes/sellerAddress.router.js";
 import CouponsRouter from "./routes/coupons.router.js";
+import CartsRouter from "./routes/carts.router.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ const categoriesRouter = new CategoriesRouter();
 const deliveryFormRouter = new DeliveryFormRouter();
 const sellerAddressRouter = new SellerAddressRouter();
 const couponsRouter = new CouponsRouter();
+const cartsRouter = new CartsRouter();
 
 app.use(addLogger);
 app.use(express.json({ type: 'application/json' }));
@@ -43,5 +45,6 @@ app.use('/api/categories', categoriesRouter.getRouter());
 app.use('/api/deliveryForm', deliveryFormRouter.getRouter());
 app.use('/api/sellerAddresses', sellerAddressRouter.getRouter());
 app.use('/api/coupons', couponsRouter.getRouter());
+app.use('/api/carts', cartsRouter.getRouter());
 
 app.listen(config.port, () => console.log(`Server running on port ${config.port}`))

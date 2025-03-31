@@ -3,6 +3,11 @@ import mongoose from 'mongoose';
 const cartsCollection = 'carts';
 
 const cartsSchema = new mongoose.Schema({
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true
+    },
     products: {
         type: [
             {

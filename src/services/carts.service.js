@@ -17,8 +17,12 @@ const getById = async(cid) => {
     const cartById = await cartsRepository.getById(cid);
     return cartById;
 }
-const save = async(cart) => {
-    const cartSaved = await cartsRepository.save(cart);
+const getByUserId = async(uid) => {
+    const cartById = await cartsRepository.getByUserId(uid);
+    return cartById;
+}
+const save = async(user_id,products) => {
+    const cartSaved = await cartsRepository.save(user_id,products);
     return cartSaved;
 }
 const update = async(cid, cartToReplace) => {
@@ -62,6 +66,7 @@ const purchase = async (cid, purchaser) => {
 export {
     getAll,
     getById,
+    getByUserId,
     save,
     update,
     eliminate,

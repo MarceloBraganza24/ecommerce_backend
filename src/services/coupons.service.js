@@ -13,6 +13,10 @@ const getById = async (id) => {
     const coupon = await couponsRepository.getById(id);
     return coupon;
 }
+const getByCode = async (codeCoupon) => {
+    const coupon = await couponsRepository.getByCode(codeCoupon);
+    return coupon;
+}
 const save = async (coupon) => {
     const coupons = await couponsRepository.getAll();
     const exist = coupons.find(item => item.code == coupon.code)
@@ -30,6 +34,7 @@ const eliminate = async(id) => {
 export {
     getAll,
     getById,
+    getByCode,
     save,
     eliminate
 }

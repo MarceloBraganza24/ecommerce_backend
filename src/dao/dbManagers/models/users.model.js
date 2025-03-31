@@ -25,6 +25,21 @@ const usersSchema = new mongoose.Schema({
         required: true,
         default: 'user'
     },
+    carts: {
+        type: [
+            {
+                product: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'products',
+                },
+                quantity: {
+                    type: Number,
+                    default: 1
+                }
+            }
+        ],
+        default: []
+    },
     documents: {
         type: [
             {

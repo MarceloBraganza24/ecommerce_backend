@@ -12,8 +12,12 @@ export default class Carts {
         const cart = await cartsModel.findOne({ _id: cid }).lean();
         return cart;
     }
-    save = async (cart) => {
-        const result = await cartsModel.create(cart);
+    getByUserId = async (id) => {
+        const cart = await cartsModel.findOne({ user_id: id }).lean();
+        return cart;
+    }
+    save = async (user_id,products) => {
+        const result = await cartsModel.create({user_id,products});
         return result;
     }
     update = async (cid, cartToReplace) => {

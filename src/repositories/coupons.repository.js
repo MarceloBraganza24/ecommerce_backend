@@ -10,6 +10,10 @@ export default class CouponsRepository {
         const coupon = await this.dao.getById(id);
         return coupon;
     }
+    getByCode = async(codeCoupon) => {
+        const coupon = await this.dao.getByCode(codeCoupon);
+        return coupon;
+    }
     save = async(coupon) => {
         const couponSaved = await this.dao.save(coupon);
         return couponSaved;

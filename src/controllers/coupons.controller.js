@@ -21,12 +21,31 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
+const getByCode = async (req, res) => {
+    try {
+        const { codeCoupon  } = req.body;    
+        if (!codeCoupon) {
+            return res.status(400).json({ mensaje: "Código de cupón requerido." });
+        }
+        const coupon = await couponsService.getByCode(codeCoupon);
+        if (!coupon) {
+            return res.status(400).json({ mensaje: "Código de cupón no existe." });
+        } else {
+            res.sendSuccess(coupon);
+        }
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
 
 const save = async (req, res) => {
     try {
-        const { code  } = req.body;
+        const { code,discount,expiration_date } = req.body;
         const coupon = {
             code,
+            discount,
+            expiration_date,
             coupon_datetime: req.body.coupon_datetime
         }
         const couponSaved = await couponsService.save(coupon);
@@ -59,6 +78,7 @@ const eliminate = async (req, res) => {
 export {
     getAll,
     getById,
+    getByCode,
     save,
     eliminate
 }

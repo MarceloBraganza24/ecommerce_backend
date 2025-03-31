@@ -1,14 +1,16 @@
 import Router from "./router.js";
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
-import { getAll, getById, save, update, eliminate, finalizePurchase } from '../controllers/carts.controller.js'
+import { getAll, getById,getByUserId, save, update,updateCartQuantity, eliminate, finalizePurchase } from '../controllers/carts.controller.js'
 
 export default class CartsRouter extends Router {
     init() {
-        this.get('/', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, getAll);
-        this.get('/:cid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, getById);
-        this.post('/', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, save);
-        this.put('/:cid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, update);
-        this.delete('/:cid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, eliminate);
-        this.post('/:cid/purchase', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, finalizePurchase);
+        this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAll);
+        this.get('/:cid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getById);
+        this.get('/byUserId/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getByUserId);
+        this.post('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, save);
+        this.put('/:cid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, update);
+        this.patch('/update-quantity', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updateCartQuantity);
+        this.delete('/:cid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, eliminate);
+        this.post('/:cid/purchase', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, finalizePurchase);
     }
 }
