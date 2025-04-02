@@ -24,8 +24,8 @@ export default class Carts {
         const cartUpdated = await cartsModel.updateOne({ _id: cid }, cartToReplace);
         return cartUpdated;
     }
-    eliminate = async (cid) => {
-        const cartEliminated = await cartsModel.deleteOne({ _id: cid });
+    eliminate = async (user_id) => {
+        const cartEliminated = await cartsModel.deleteOne({ user_id: user_id });
         return cartEliminated;
     }
 }

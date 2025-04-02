@@ -46,7 +46,7 @@ const update = async (req, res) => {
         if (!updatedDeliveryForm) {
             return res.status(404).json({ message: 'Formulario de entrega no encontrado' });
         }
-        res.sendSuccessNewResourse(updatedDeliveryForm);
+        res.sendSuccess(updatedDeliveryForm);
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);
@@ -61,7 +61,7 @@ const eliminate = async (req, res) => {
             return res.status(404).json({ message: 'Formulario de entrega no encontrado' });
         }
         const deletedDeliveryForm = await deliveryFormService.eliminate(dFid);
-        res.sendSuccessNewResourse(deletedDeliveryForm);
+        res.sendSuccess(deletedDeliveryForm);
 
     } catch (error) {
         res.sendServerError(error.message);

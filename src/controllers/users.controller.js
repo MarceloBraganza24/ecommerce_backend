@@ -175,6 +175,30 @@ const updateProps = async (req, res) => {
     }
 }
 
+const updateSelectedAddress = async (req, res) => {
+    try {
+        const { uid } = req.params;
+        const { selected_addresses } = req.body;
+
+
+        if (!selected_addresses) {
+            return res.status(400).json({ message: "No se proporcionó una dirección seleccionada." });
+        }
+
+        const updatedUser = await usersService.updateSelectedAddress(uid,{ selected_addresses: selected_addresses },
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "Usuario no encontrado." });
+        }
+
+        res.json({ message: "Domicilio actualizado correctamente.", user: updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar el domicilio.", error: error.message });
+    }
+};
+
+
 /* const eliminate = async (req, res) => {
     try {
         const currentUsers = await usersService.eliminate();
@@ -218,6 +242,7 @@ export {
     uploadFiles,
     update,
     updateProp,
+    updateSelectedAddress,
     updateProps,
     eliminateOne,
     eliminateCartUser,

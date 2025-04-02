@@ -9,5 +9,7 @@ export default class UsersDto {
         this.isLoggedIn = user.isLoggedIn;
         this.isMembershipFeePaid = user.isMembershipFeePaid;
         this.user_datetime = user.user_datetime;
+        this.addresses = user.addresses;
+        this.selected_addresses = user.selected_addresses;
     }
 }

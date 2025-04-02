@@ -159,9 +159,9 @@ const removeProductFromCart = async (req, res) => {
 
 const eliminate = async (req, res) => {
     try {
-        const { cid } = req.params;
-        const deletedCart = await cartsService.eliminate(cid);
-        res.send({ status: 'success', payload: deletedCart });
+        const { user_id } = req.params;
+        const deletedCart = await cartsService.eliminate(user_id);
+        res.status(200).send({ status: 'success', payload: deletedCart });
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);

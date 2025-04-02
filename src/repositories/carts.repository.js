@@ -22,8 +22,8 @@ export default class CartsRepository {
         const cartUpdated = await this.dao.update(cid, cartToReplace);
         return cartUpdated;
     }
-    eliminate = async(cid) => {
-        const cartEliminated = await this.dao.eliminate(cid);
+    eliminate = async(user_id) => {
+        const cartEliminated = await this.dao.eliminate(user_id);
         return cartEliminated;
     }
 }

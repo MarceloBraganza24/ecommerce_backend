@@ -148,6 +148,17 @@ const updateProps = async(uid,first_name,last_name) => {
     return userUpdated;
 }
 
+const updateSelectedAddress = async(user_id,selected_addresses) => {
+    const userById = await usersRepository.getById(user_id);
+    
+    const propsUserUpdated = {
+        ...userById,
+        selected_addresses: selected_addresses.selected_addresses,
+    }
+    const userUpdated = await usersRepository.update(user_id, propsUserUpdated);
+    return userUpdated;
+}
+
 const logOut = async(user,last_connection) => {
     const newUser = {
         ...user,
@@ -211,6 +222,7 @@ export {
     changePass,
     update,
     updateProp,
+    updateSelectedAddress,
     updateProps,
     logOut,
     eliminateOne,

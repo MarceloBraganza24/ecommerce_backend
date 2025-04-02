@@ -29,8 +29,8 @@ const update = async(cid, cartToReplace) => {
     const cartUpdated = await cartsRepository.update(cid, cartToReplace);
     return cartUpdated;
 }
-const eliminate = async(cid) => {
-    const cartEliminated = await cartsRepository.eliminate(cid);
+const eliminate = async(user_id) => {
+    const cartEliminated = await cartsRepository.eliminate(user_id);
     return cartEliminated;
 }
 
