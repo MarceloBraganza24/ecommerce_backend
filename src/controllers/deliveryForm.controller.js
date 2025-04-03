@@ -24,8 +24,8 @@ const getById = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const { street,street_number,locality,province,country,postal_code,name,phone} = req.body;
-        if (!street || !street_number || !locality || !province || !country || !postal_code || !name || !phone || isNaN(phone)) {
+        const { street,street_number,locality,province,country,postal_code,name,phone,owner} = req.body;
+        if (!street || !street_number || !locality || !province || !country || !postal_code || !name || !phone || isNaN(phone) || !owner) {
             throw new DeliveryFormExists('You must complete all fields correctly');
         }
         const deliveryForm = await deliveryFormService.save(req.body);

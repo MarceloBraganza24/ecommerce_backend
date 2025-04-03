@@ -3,7 +3,7 @@ import { UserByEmailExists, InvalidCredentials } from "../utils/custom.exception
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 
-const singUp = async (req, res) => {
+const singIn = async (req, res) => {
     try {
         const { first_name ,last_name, email, password,user_datetime } = req.body;
         if(!first_name || !last_name || !email || !password || !user_datetime) return res.sendClientError('incomplete values');
@@ -64,7 +64,7 @@ const current = async(req,res) =>{
 }
 
 export {
-    singUp,
+    singIn,
     login,
     logout,
     current

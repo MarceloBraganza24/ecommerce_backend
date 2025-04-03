@@ -43,6 +43,10 @@ const deliveryFormSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    owner: {
+        type: String,
+        required: true
+    },
 }, { strict: false });
 
 export const deliveryFormModel = mongoose.model(deliveryFormCollection, deliveryFormSchema);

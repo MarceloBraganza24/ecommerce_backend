@@ -180,6 +180,8 @@ const updateSelectedAddress = async (req, res) => {
         const { uid } = req.params;
         const { selected_addresses } = req.body;
 
+        console.log(selected_addresses)
+
 
         if (!selected_addresses) {
             return res.status(400).json({ message: "No se proporcionó una dirección seleccionada." });
