@@ -164,14 +164,10 @@ const logOut = async(user,last_connection) => {
         ...user,
         last_connection: last_connection
     }
-    const userById = await usersRepository.getById(user._id);
     if(newUser.isLoggedIn) {
         newUser.isLoggedIn = false;
-        if(newUser.role != userById.role) {
-            newUser.role = userById.role;
-            const userUpdated = await usersRepository.update(user._id, newUser);
-            return userUpdated;
-        }
+        const userUpdated = await usersRepository.update(user._id, newUser);
+        return userUpdated;
     }
 }
 

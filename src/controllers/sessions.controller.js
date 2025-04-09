@@ -43,10 +43,9 @@ const logout = async (req, res) => {
     } catch (error) {
         if(error instanceof UserAlreadyExists || error instanceof UserByEmailExists) {
             return res.sendClientError(error.message);
-        } else {
-            res.sendServerError(error.message);
-            req.logger.error(error.message);
         }
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
     }
 }
 
