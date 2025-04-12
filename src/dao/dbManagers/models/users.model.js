@@ -51,7 +51,6 @@ const usersSchema = new mongoose.Schema({
         ],
         default: []
     },
-    addresses: [AddressSchema], // Lista de domicilios
     selected_addresses: { 
         type: AddressSchema, // Objeto con la misma estructura que `domicilios`
         default: null 
