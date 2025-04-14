@@ -24,11 +24,12 @@ const getById = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const { street,street_number,locality, sellerAddress_datetime  } = req.body;
+        const { street,street_number,locality,province, sellerAddress_datetime  } = req.body;
         const sellerAddress = {
             street,
             street_number,
             locality,
+            province,
             sellerAddress_datetime
         }
         const sellerAddressSaved = await sellerAddressService.save(sellerAddress);
