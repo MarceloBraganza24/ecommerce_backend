@@ -32,21 +32,6 @@ const getByUserId = async (req, res) => {
     }
 }
 
-/* const save = async (req, res) => {
-    try {
-        const { user_id, products } = req.body;
-        if(!products) {
-            return res.sendClientError('incomplete values');
-        }
-        const cartSaved = await cartsService.save(user_id,products)
-        res.sendSuccessNewResourse(cartSaved);
-    } catch (error) {
-        res.sendServerError(error.message); 
-        req.logger.error(error.message);
-    }
-} */
-
-
 const save = async (req, res) => {
     try {
         const { user_id, products } = req.body;
@@ -136,13 +121,13 @@ const removeProductFromCart = async (req, res) => {
         if (!cart) {
             return res.status(404).json({ message: "Carrito no encontrado" });
         }
-
+        
         // Filtrar productos, dejando solo los que NO sean el que queremos eliminar
         cart.products = cart.products.filter(p => p.product._id.toString() !== product_id);
 
-        if (cart.products.length === 0) {
+        if (cart.products.length == 0) {
             // Si no quedan productos, eliminar el carrito completamente
-            await cartsService.eliminate(cart._id);
+            await cartsService.eliminate(cart.user_id);
             return res.json({ message: "Carrito eliminado porque no tenía más productos" });
         }
 
