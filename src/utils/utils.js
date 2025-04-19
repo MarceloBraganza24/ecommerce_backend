@@ -15,7 +15,7 @@ const createHash = password => bcrypt.hashSync(password, bcrypt.genSaltSync(10))
 const isValidPassword = (plainPassword, hashedPassword) => bcrypt.compareSync(plainPassword, hashedPassword);
 
 const generateToken = (user) => {
-    const token = jwt.sign({ user }, config.privateKeyJWT, { expiresIn: '24h' });
+    const token = jwt.sign({ user }, config.privateKeyJWT, { expiresIn: '1h' });
     return token;
 }
 

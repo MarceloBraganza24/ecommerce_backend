@@ -31,7 +31,11 @@ const cartsRouter = new CartsRouter();
 app.use(addLogger);
 app.use(express.json({ type: 'application/json' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+//app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // o donde esté corriendo tu frontend
+    credentials: true
+  }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 

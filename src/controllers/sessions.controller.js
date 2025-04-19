@@ -23,6 +23,13 @@ const login = async (req, res) => {
         const { email, password, last_connection } = req.body;
         if( !email || !password) return res.sendClientError('incomplete values');
         const accessToken = await usersService.login(password, email,last_connection);
+        res.cookie('TokenJWT', accessToken, {
+            //httpOnly: true,
+            //secure: true, // Asegurate de estar en HTTPS en producción
+            sameSite: 'Lax',
+            maxAge: 60 * 60 * 1000, // 1 hora
+            path: '/',
+        });
         res.sendSuccess(accessToken);
     } catch (error) {
         if(error instanceof InvalidCredentials) {
