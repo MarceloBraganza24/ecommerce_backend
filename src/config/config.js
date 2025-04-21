@@ -21,5 +21,6 @@ export default {
     persistence: process.env.PERSISTENCE,
     userNodemailer: process.env.USER_NODEMAILER,
     passwordNodemailer: process.env.PASSWORD_NODEMAILER,
-    privateKeyJWT: process.env.PRIVATE_KEY_JWT
+    privateKeyJWT: process.env.PRIVATE_KEY_JWT,
+    googleApiKey: process.env.GOOGLE_API_KEY
 }
