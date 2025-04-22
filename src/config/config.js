@@ -22,5 +22,6 @@ export default {
     userNodemailer: process.env.USER_NODEMAILER,
     passwordNodemailer: process.env.PASSWORD_NODEMAILER,
     privateKeyJWT: process.env.PRIVATE_KEY_JWT,
-    googleApiKey: process.env.GOOGLE_API_KEY
+    googleApiKey: process.env.GOOGLE_API_KEY,
+    access_token_mp: process.env.MP_ACCESS_TOKEN
 }

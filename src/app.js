@@ -17,6 +17,7 @@ import SellerAddressRouter from "./routes/sellerAddress.router.js";
 import CouponsRouter from "./routes/coupons.router.js";
 import CartsRouter from "./routes/carts.router.js";
 import ShipmentsRouter from "./routes/shipments.router.js";
+import PaymentsRouter from "./routes/payments.router.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ const sellerAddressRouter = new SellerAddressRouter();
 const couponsRouter = new CouponsRouter();
 const cartsRouter = new CartsRouter();
 const shipmentsRouter = new ShipmentsRouter();
+const paymentsRouter = new PaymentsRouter();
 
 app.use(addLogger);
 app.use(express.json({ type: 'application/json' }));
@@ -53,5 +55,6 @@ app.use('/api/sellerAddresses', sellerAddressRouter.getRouter());
 app.use('/api/coupons', couponsRouter.getRouter());
 app.use('/api/carts', cartsRouter.getRouter());
 app.use('/api/calculate-shipments', shipmentsRouter.getRouter());
+app.use('/api/payments', paymentsRouter.getRouter());
 
 app.listen(config.port, () => console.log(`Server running on port ${config.port}`))
