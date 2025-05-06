@@ -8,6 +8,7 @@ export let Categories;
 export let DeliveryForm;
 export let SellerAddress;
 export let Coupons;
+export let Purchases;
 
 const persistence = config.persistence;
 
@@ -24,6 +25,7 @@ switch(persistence) {
         const { default: DeliveryFormMongo } = await import('./dbManagers/deliveryForm.manager.js');
         const { default: SellerAddressMongo } = await import('./dbManagers/sellerAddress.manager.js');
         const { default: CouponsMongo } = await import('./dbManagers/coupons.manager.js')
+        const { default: PurchasesMongo } = await import('./dbManagers/purchases.manager.js')
         Users = UsersMongo;
         Products = ProductsMongo;
         Carts = CartsMongo;
@@ -32,6 +34,7 @@ switch(persistence) {
         DeliveryForm = DeliveryFormMongo;
         SellerAddress = SellerAddressMongo;
         Coupons = CouponsMongo;
+        Purchases = PurchasesMongo;
         break;
     case 'FILE':
         /* const { default: UsersFile } = await import('./fileManagers/users.manager.js');

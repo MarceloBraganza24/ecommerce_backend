@@ -1,44 +1,103 @@
-import { MercadoPagoConfig,Payment } from 'mercadopago';
+//import { MercadoPagoConfig } from 'mercadopago';
+import { MercadoPagoConfig, Preference,Payment  } from 'mercadopago'; // Asegurate de tener esta importación
+import config from '../config/config.js';
+import * as purchasesService from '../services/purchases.service.js';
 
-const mpClient = new MercadoPagoConfig({
-    accessToken: process.env.MP_ACCESS_TOKEN,
-    options: { timeout: 5000 }, // opcional
-});
+const client = new MercadoPagoConfig({ accessToken: config.access_token_mp });
 
-const generatePurchase = async (req, res) => {
+const createPreferencePurchase = async (req, res) => {
     try {
-        const {
-          token,
-          payment_method_id,
-          transaction_amount,
-          installments,
-          payer,
-        } = req.body;
-    
-        const paymentData = {
-          token,
-          payment_method_id,
-          transaction_amount: Number(transaction_amount),
-          installments: Number(installments),
-          description: 'Compra en mi tienda',
-          payer: {
-            email: payer.email,
-            identification: {
-              type: payer.identification.type,
-              number: payer.identification.number,
+        const { items,user,shippingAddress,discount } = req.body;
+
+        const itemsFormateados = items.map(item => ({
+            id: item.product._id,
+            title: item.product.title,
+            unit_price: Number(item.product.price),
+            quantity: item.quantity,
+            currency_id: "ARS"
+        }));
+          
+        if(discount) {
+
+            const subtotal = itemsFormateados.reduce((acc, item) => {
+                return acc + (item.unit_price * item.quantity);
+            }, 0);
+            const montoDescuento = Number(((subtotal * discount) / 100).toFixed(2));
+
+            if (montoDescuento > 0) {
+                itemsFormateados.push({
+                    title: `Descuento ${discount}%`,
+                    unit_price: -montoDescuento,
+                    quantity: 1,
+                    currency_id: 'ARS'
+                });
+            }
+            
+        }
+          
+        const preferenceData = {
+            items: itemsFormateados,
+            payer: { email: user.email },
+            metadata: {
+                shippingAddress
             },
-          },
+            back_urls: {
+                success: 'https://google.com',
+                failure: 'https://google.com',
+                pending: 'https://google.com'
+            },
+            auto_return: "approved"
         };
-    
-        const payment = await new Payment(mpClient).create(paymentData);
-    
-        res.status(200).json(payment);
+
+        const preference = new Preference(client);
+        const response = await preference.create({ body: preferenceData });
+
+        res.status(200).json({ init_point: response.init_point });
     } catch (error) {
-    console.error('Error al procesar el pago:', error);
-    res.status(500).json({ error: 'Error al procesar el pago' });
+        console.error("Error al crear preferencia:", error);
+        res.status(500).json({ error: "No se pudo crear la preferencia" });
     }
-} 
+};
+
+const webhookPayment = async (req, res) => {
+    try {
+        const { type, 'data.id': paymentId } = req.query;
+  
+        if (type === 'payment' && paymentId) {
+            const paymentClient = new Payment(client);
+            const result = await paymentClient.get({ id: paymentId });
+            const payment = result.body;
+  
+            if (payment.status === 'approved') {
+                const items = payment.additional_info?.items || [];
+                const shippingAddress = payment.metadata?.shippingAddress;
+                const deliveryMethod = payment.metadata?.deliveryMethod;
+
+                const newPurchase = {
+                    mp_payment_id: payment.id,
+                    status: payment.status,
+                    amount: payment.transaction_amount,
+                    payer_email: payment.payer.email,
+                    items,
+                    shippingAddress,
+                    deliveryMethod,
+                    purchase_datetime: payment.date_created
+                }
+                const purchaseSaved = await purchasesService.save(newPurchase);
+                res.sendSuccessNewResourse(purchaseSaved);
+
+                console.log(`Pago aprobado y guardado: ${payment.id}`);
+            }
+        }
+  
+        res.sendStatus(200); // Mercado Pago necesita un 200 OK
+    } catch (error) {
+        console.error('Error en webhook:', error);
+        res.sendStatus(500);
+    }
+};
 
 export {
-    generatePurchase
+    createPreferencePurchase,
+    webhookPayment
 }
