@@ -24,12 +24,13 @@ const getById = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const { street,street_number,locality,province, sellerAddress_datetime  } = req.body;
+        const { street,street_number,locality,province,postal_code, sellerAddress_datetime  } = req.body;
         const sellerAddress = {
             street,
             street_number,
             locality,
             province,
+            postal_code,
             sellerAddress_datetime
         }
         const sellerAddressSaved = await sellerAddressService.save(sellerAddress);
@@ -46,10 +47,6 @@ const save = async (req, res) => {
 const eliminate = async (req, res) => {
     try {
         const { sAId } = req.params;
-        const sellerAddress = await sellerAddressService.getById(sAId);
-        /* if (!sellerAddress) {
-            return res.status(404).json({ message: 'Domicilio no encontrado' });
-        } */
         const deletedSellerAddress = await sellerAddressService.eliminate(sAId);
         res.sendSuccessNewResourse(deletedSellerAddress);
 

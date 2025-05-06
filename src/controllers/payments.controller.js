@@ -1,4 +1,3 @@
-//import { MercadoPagoConfig } from 'mercadopago';
 import { MercadoPagoConfig, Preference,Payment  } from 'mercadopago'; // Asegurate de tener esta importación
 import config from '../config/config.js';
 import * as purchasesService from '../services/purchases.service.js';
@@ -7,7 +6,7 @@ const client = new MercadoPagoConfig({ accessToken: config.access_token_mp });
 
 const createPreferencePurchase = async (req, res) => {
     try {
-        const { items,user,shippingAddress,discount } = req.body;
+        const { items,user,shippingAddress,deliveryMethod,discount } = req.body;
 
         const itemsFormateados = items.map(item => ({
             id: item.product._id,
@@ -39,7 +38,8 @@ const createPreferencePurchase = async (req, res) => {
             items: itemsFormateados,
             payer: { email: user.email },
             metadata: {
-                shippingAddress
+                shippingAddress,
+                deliveryMethod
             },
             back_urls: {
                 success: 'https://google.com',

@@ -19,6 +19,10 @@ const sellerAddressSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    postal_code: {
+        type: String,
+        required: true
+    },
     sellerAddress_datetime: {
         type: String,
         required: true

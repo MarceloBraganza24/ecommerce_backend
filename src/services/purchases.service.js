@@ -14,13 +14,6 @@ const getById = async (id) => {
     return purchase;
 }
 const save = async (purchase) => {
-    //const purchases = await purchasesRepository.getAll();
-    //const exist = purchases.find(item => item.code == purchase.code)
-
-    // const exist = await purchasesRepository.getById(purchase._id);
-    // if(exist) {
-    //     throw new PurchaseExists('There is already a purchase with that id');
-    // }
     const purchaseSaved = await purchasesRepository.save(purchase);
     return purchaseSaved;
 }
