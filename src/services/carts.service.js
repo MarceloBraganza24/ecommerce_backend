@@ -52,10 +52,10 @@ const purchase = async (cid, purchaser) => {
             }
             return outStock;
         })
-        const ticket = await ticketsService.save(purchaser, amount);
+        //const ticket = await ticketsService.save(purchaser, amount);
         await cartsRepository.update(cid, outStock);
         await session.commitTransaction();
-        return ticket;
+        //return ticket;
     } catch (error) {
         await session.abortTransaction();
     } finally {

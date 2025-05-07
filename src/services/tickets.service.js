@@ -10,15 +10,13 @@ const getById = async (id) => {
     const ticket = await ticketsManager.getById(id);
     return ticket;
 }
-const save = async (purchaser, amount) => {
+const save = async (ticket) => {
     const code = Date.now() + Math.floor(Math.random() * 100000 + 1);
-    const ticket = {
+    const newTicket = {
+        ...ticket,
         code,
-        purchase_datetime:  new Date().toLocaleString(),
-        amount,
-        purchaser
     }
-    const ticketSaved = await ticketsManager.save(ticket);
+    const ticketSaved = await ticketsManager.save(newTicket);
     return ticketSaved;
 }
 

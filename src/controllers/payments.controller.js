@@ -1,12 +1,13 @@
 import { MercadoPagoConfig, Preference,Payment  } from 'mercadopago'; // Asegurate de tener esta importación
 import config from '../config/config.js';
-import * as purchasesService from '../services/purchases.service.js';
+import * as ticketsService from '../services/tickets.service.js';
+import * as cartsService from '../services/carts.service.js';
 
 const client = new MercadoPagoConfig({ accessToken: config.access_token_mp });
 
 const createPreferencePurchase = async (req, res) => {
     try {
-        const { items,user,shippingAddress,deliveryMethod,discount } = req.body;
+        const { items,user,shippingAddress,deliveryMethod,discount,user_cart_id } = req.body;
 
         const itemsFormateados = items.map(item => ({
             id: item.product._id,
@@ -39,7 +40,8 @@ const createPreferencePurchase = async (req, res) => {
             payer: { email: user.email },
             metadata: {
                 shippingAddress,
-                deliveryMethod
+                deliveryMethod,
+                user_cart_id,
             },
             back_urls: {
                 success: 'https://google.com',
@@ -65,15 +67,15 @@ const webhookPayment = async (req, res) => {
   
         if (type === 'payment' && paymentId) {
             const paymentClient = new Payment(client);
-            const result = await paymentClient.get({ id: paymentId });
-            const payment = result.body;
+            const payment = await paymentClient.get({ id: paymentId });
   
             if (payment.status === 'approved') {
                 const items = payment.additional_info?.items || [];
-                const shippingAddress = payment.metadata?.shippingAddress;
-                const deliveryMethod = payment.metadata?.deliveryMethod;
+                const shippingAddress = payment.metadata?.shipping_address;
+                const deliveryMethod = payment.metadata?.delivery_method;
+                const user_cart_id = payment.metadata?.user_cart_id;
 
-                const newPurchase = {
+                const newTicket = {
                     mp_payment_id: payment.id,
                     status: payment.status,
                     amount: payment.transaction_amount,
@@ -83,10 +85,11 @@ const webhookPayment = async (req, res) => {
                     deliveryMethod,
                     purchase_datetime: payment.date_created
                 }
-                const purchaseSaved = await purchasesService.save(newPurchase);
-                res.sendSuccessNewResourse(purchaseSaved);
+                const ticketSaved = await ticketsService.save(newTicket);
+                await cartsService.purchase(user_cart_id, payment.payer.email);
 
-                console.log(`Pago aprobado y guardado: ${payment.id}`);
+                //console.log(`Pago aprobado y guardado: ${payment.id}`);
+                return res.sendSuccessNewResourse(ticketSaved);
             }
         }
   
