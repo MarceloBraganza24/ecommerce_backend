@@ -34,7 +34,7 @@ const eliminate = async(user_id) => {
     return cartEliminated;
 }
 
-let amount = 0;
+/* let amount = 0;
 const outStock = [];
 
 const purchase = async (cid, purchaser) => {
@@ -61,7 +61,51 @@ const purchase = async (cid, purchaser) => {
     } finally {
         session.endSession();
     }
-}
+} */
+let amount = 0;
+
+const purchase = async (cid) => {
+    const session = await mongoose.startSession();
+    const outStock = [];
+    try {
+        session.startTransaction();
+
+        const cart = await cartsRepository.getById(cid);
+
+        for (const { product, quantity } of cart.products) {
+            if (product.stock >= quantity) {
+                amount += product.price * quantity;
+                product.stock -= quantity;
+                await productsRepository.update(product._id, product);
+            } else {
+                outStock.push({ product, quantity });
+            }
+        }
+
+        // Actualizar carrito: vaciar si todo fue comprado, o dejar los que quedaron sin stock
+        if (outStock.length > 0) {
+            await cartsRepository.update(cid, {
+                products: outStock.map(({ product, quantity }) => ({
+                    product: product._id,
+                    quantity
+                }))
+            });
+        } else {
+            await cartsRepository.update(cid, { products: [] });
+        }
+
+        // const ticket = await ticketsService.save(purchaser, amount);
+        await session.commitTransaction();
+        // return ticket;
+
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+};
+    
 
 export {
     getAll,

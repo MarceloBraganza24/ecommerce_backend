@@ -42,6 +42,7 @@ const createPreferencePurchase = async (req, res) => {
                 shippingAddress,
                 deliveryMethod,
                 user_cart_id,
+                user_id: user._id,
             },
             back_urls: {
                 success: 'https://google.com',
@@ -74,6 +75,7 @@ const webhookPayment = async (req, res) => {
                 const shippingAddress = payment.metadata?.shipping_address;
                 const deliveryMethod = payment.metadata?.delivery_method;
                 const user_cart_id = payment.metadata?.user_cart_id;
+                const user_id = payment.metadata?.user_id;
 
                 const newTicket = {
                     mp_payment_id: payment.id,
@@ -86,8 +88,8 @@ const webhookPayment = async (req, res) => {
                     purchase_datetime: payment.date_created
                 }
                 const ticketSaved = await ticketsService.save(newTicket);
-                await cartsService.purchase(user_cart_id, payment.payer.email);
-
+                await cartsService.purchase(user_cart_id,user_id);
+                //await cartsService.eliminate(user_id);
                 //console.log(`Pago aprobado y guardado: ${payment.id}`);
                 return res.sendSuccessNewResourse(ticketSaved);
             }
