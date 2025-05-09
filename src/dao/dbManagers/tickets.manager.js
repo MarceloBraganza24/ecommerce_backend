@@ -9,6 +9,10 @@ export default class TicketsDao {
         const ticket = await ticketsModel.findById(id).lean();
         return ticket;
     }
+    getAllByPage = async (query, { page, limit }) => {
+        const tickets = await ticketsModel.paginate(query, { page, limit });
+        return tickets; 
+    }
     save = async(ticket) => {
         const ticketSaved = await ticketsModel.create(ticket);
         return ticketSaved;

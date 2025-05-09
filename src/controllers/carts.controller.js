@@ -156,8 +156,7 @@ const eliminate = async (req, res) => {
 const finalizePurchase = async (req, res) => {
     try {
         const { cid } = req.params;
-        const purchaser = req.user.email;
-        const purchase = await cartsService.purchase(cid, purchaser);
+        const purchase = await cartsService.purchase(cid);
         res.status(201).send({ status: 'success', purchase: purchase });
     } catch (error) {
         res.sendServerError(error.message);

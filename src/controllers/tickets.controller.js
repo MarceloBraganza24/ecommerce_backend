@@ -9,7 +9,18 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
+const getAllByPage = async (req, res) => {
+    try {
+        const { page = 1, limit = 25, search = "" } = req.query;      
+        const query = search ? { title: { $regex: search, $options: "i" } } : {};
 
+        const tickets = await ticketsService.getAllByPage(query, { page, limit });
+        res.sendSuccess(tickets);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} 
 const getById = async (req, res) => {
     try {
         const { tid } = req.params;            
@@ -23,8 +34,18 @@ const getById = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const { purchaser, amount } = req.body;
-        const ticket = await ticketsService.save(purchaser, amount);
+        const { payment,items,shippingAddress,deliveryMethod } = req.body;
+        const newTicket = {
+            mp_payment_id: payment.id,
+            status: payment.status,
+            amount: payment.transaction_amount,
+            payer_email: payment.payer.email,
+            items,
+            shippingAddress,
+            deliveryMethod,
+            purchase_datetime: payment.date_created
+        }
+        const ticket = await ticketsService.save(newTicket);
         res.sendSuccessNewResourse(ticket);
     } catch (error) {
         res.sendServerError(error.message);
@@ -35,5 +56,6 @@ const save = async (req, res) => {
 export {
     getAll,
     getById,
-    save
+    save,
+    getAllByPage
 }

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const ticketsCollection = 'tickets';
 
@@ -10,7 +11,7 @@ const ticketsSchema = new mongoose.Schema({
     },
     mp_payment_id: {
         type: String,
-        required: true
+        //required: true
     },
     status: String,
     amount: Number,
@@ -38,5 +39,7 @@ const ticketsSchema = new mongoose.Schema({
         required: true
     },
 });
+
+ticketsSchema.plugin(mongoosePaginate);
 
 export const ticketsModel = mongoose.model(ticketsCollection, ticketsSchema);

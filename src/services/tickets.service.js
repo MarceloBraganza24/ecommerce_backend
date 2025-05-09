@@ -6,6 +6,10 @@ const getAll = async () => {
     const tickets = await ticketsManager.getAll();
     return tickets;
 }
+const getAllByPage = async(query, { page, limit }) => {
+    const tickets = await ticketsManager.getAllByPage(query, { page, limit });
+    return tickets;
+}
 const getById = async (id) => {
     const ticket = await ticketsManager.getById(id);
     return ticket;
@@ -23,5 +27,6 @@ const save = async (ticket) => {
 export {
     getAll,
     getById,
-    save
+    save,
+    getAllByPage
 }

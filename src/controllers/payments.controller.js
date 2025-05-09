@@ -88,8 +88,7 @@ const webhookPayment = async (req, res) => {
                     purchase_datetime: payment.date_created
                 }
                 const ticketSaved = await ticketsService.save(newTicket);
-                await cartsService.purchase(user_cart_id,user_id);
-                //await cartsService.eliminate(user_id);
+                await cartsService.purchase(user_cart_id);
                 //console.log(`Pago aprobado y guardado: ${payment.id}`);
                 return res.sendSuccessNewResourse(ticketSaved);
             }
