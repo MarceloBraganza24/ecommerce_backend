@@ -1,4 +1,5 @@
 import * as ticketsService from '../services/tickets.service.js';
+import * as cartsService from '../services/carts.service.js';
 
 const getAll = async (req, res) => {
     try {
@@ -53,9 +54,29 @@ const save = async (req, res) => {
     }
 }
 
+const saveSale = async (req, res) => {
+    try {
+        const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_cart_id } = req.body;
+        const newTicket = {
+            amount,
+            payer_email,
+            items,
+            deliveryMethod,
+            purchase_datetime
+        }
+        const ticket = await ticketsService.save(newTicket);
+        await cartsService.purchase(user_cart_id);
+        res.sendSuccessNewResourse(ticket);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
+
 export {
     getAll,
     getById,
+    saveSale,
     save,
     getAllByPage
 }
