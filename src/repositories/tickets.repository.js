@@ -12,6 +12,10 @@ export default class TicketsRepository {
         const tickets = await this.dao.getAllByPage(query, { page, limit });
         return tickets;
     }
+    getAllByPageAndEmail = async(query, { page, limit }) => {
+        const tickets = await this.dao.getAllByPageAndEmail(query, { page, limit });
+        return tickets;
+    }
     getById = async (id) => {
         const ticket = await this.dao.getById(id);
         return ticket;
@@ -19,5 +23,9 @@ export default class TicketsRepository {
     save = async (ticket) => {
         const ticketSaved = await this.dao.save(ticket);
         return ticketSaved;
+    }
+    eliminate = async(id) => {
+        const ticketEliminated = await this.dao.eliminate(id);
+        return ticketEliminated;
     }
 }

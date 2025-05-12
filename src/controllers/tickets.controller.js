@@ -22,6 +22,40 @@ const getAllByPage = async (req, res) => {
         req.logger.error(error.message);
     }
 } 
+/* const getAllByPageAndEmail = async (req, res) => {
+    try {
+        const { page = 1, limit = 25, search = "" } = req.query;      
+        const query = search ? { title: { $regex: search, $options: "i" } } : {};
+
+        const tickets = await ticketsService.getAllByPage(query, { page, limit });
+        res.sendSuccess(tickets);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}  */
+const getAllByPageAndEmail = async (req, res) => {
+    try {
+        const { page = 1, limit = 25, search = "", email } = req.query;
+
+        const query = {};
+
+        if (search) {
+            query.title = { $regex: search, $options: "i" };
+        }
+
+        if (email) {
+            query.payer_email  = email;
+        }
+
+        const tickets = await ticketsService.getAllByPageAndEmail(query, { page, limit });
+        res.sendSuccess(tickets);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
+
 const getById = async (req, res) => {
     try {
         const { tid } = req.params;            
@@ -72,11 +106,28 @@ const saveSale = async (req, res) => {
         req.logger.error(error.message);
     }
 }
+const eliminate = async (req, res) => {
+    try {
+        const { tid } = req.params;
+        //const coupon = await couponsService.getById(tid);
+        /* if (!coupons) {
+            return res.status(404).json({ message: 'Domicilio no encontrado' });
+        } */
+        const deletedTicket = await ticketsService.eliminate(tid);
+        res.sendSuccessNewResourse(deletedTicket);
+
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
 
 export {
     getAll,
     getById,
     saveSale,
     save,
+    eliminate,
+    getAllByPageAndEmail,
     getAllByPage
 }

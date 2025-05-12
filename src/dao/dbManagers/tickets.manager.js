@@ -13,8 +13,16 @@ export default class TicketsDao {
         const tickets = await ticketsModel.paginate(query, { page, limit });
         return tickets; 
     }
+    getAllByPageAndEmail = async (query, { page, limit }) => {
+        const tickets = await ticketsModel.paginate(query, { page, limit });
+        return tickets; 
+    }
     save = async(ticket) => {
         const ticketSaved = await ticketsModel.create(ticket);
         return ticketSaved;
+    }
+    eliminate = async (id) => {
+        const ticketEliminated = await ticketsModel.deleteOne({ _id: id });
+        return ticketEliminated;
     }
 }
