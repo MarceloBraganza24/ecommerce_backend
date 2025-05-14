@@ -14,10 +14,10 @@ export default class ProductsRepository {
         const products = await this.dao.getAllByPage(query, { page, limit });
         return products;
     }
-    /* getAllByPage = async(page) => {
-        const products = await this.dao.getAllByPage(page);
+    getIdsByTitle = async(title) => {
+        const products = await this.dao.getIdsByTitle(title);
         return products;
-    } */
+    }
     save = async(product) => {
         const productSaved = await this.dao.save(product);
         return productSaved;

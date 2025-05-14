@@ -12,16 +12,6 @@ const getAll = async (req, res) => {
     }
 } 
 
-/* const getAllByPage = async (req, res) => {
-    try {
-        const { page = 1 } = req.query;            
-        const products = await productsService.getAllByPage(page);
-        res.sendSuccess(products);
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}  */
 const getAllBy = async (req, res) => {
     try {
         const { page = 1, limit, ...filters } = req.query;
@@ -66,32 +56,6 @@ const getAllBy = async (req, res) => {
             prevPage,
             nextPage,
         });
-
-
-
-       /*  const query = req.query;
-
-        // Si hay filtros en la query, construir el objeto de búsqueda
-        const filter = {};
-    
-        // Iterar sobre las propiedades de la query
-        for (const key in query) {
-          if (query[key]) {
-            // Agregar a filter el valor de la propiedad en la query
-            filter[key] = query[key];
-          }
-        }
-    
-        // Obtener los productos que coincidan con el filtro dinámico
-        const products = await productsModel.find(filter); */
-
-
-
-
-        //const { page = 1, limit = 10, by = "" } = req.query;      
-        //const query = by ? { title: { $regex: by, $options: "i" } } : {};
-
-        //const products = await productsService.getAllByPage(query, { page, limit });
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);

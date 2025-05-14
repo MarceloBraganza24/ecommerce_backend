@@ -16,10 +16,13 @@ export default class Products {
         const products = await productsModel.paginate(query, { page, limit });
         return products; 
     }
-    /* getAllByPage = async (page) => {
-        const products = await productsModel.paginate({}, {limit: 25, page, lean: true});
-        return products; 
-    } */
+    getIdsByTitle = async (title) => {
+        const products = await productsModel.find(
+            { title: { $regex: title, $options: "i" } },
+            { _id: 1 } // solo devuelve el _id
+        );
+        return products.map(p => p._id.toString()); // Convierte los _id a string
+    }
     save = async (product) => {
         const productSaved = await productsModel.create(product);
         return productSaved;

@@ -9,21 +9,19 @@ const getById = async(pid) => {
     const product = await productsRepository.getById(pid);
     return product;
 }
-
 const getAll = async() => {
     const products = await productsRepository.getAll();
     return products;
 }
-
 const getAllByPage = async(query, { page, limit }) => {
     const products = await productsRepository.getAllByPage(query, { page, limit });
     return products;
 }
-/* const getAllByPage = async(page) => {
-    const products = await productsRepository.getAllByPage(page);
-    return products;
-} */
-
+const getIdsByTitle = async (title) => {
+    // Llamamos a un repositorio para obtener los productos que coinciden con el título
+    const products = await productsRepository.getIdsByTitle(title);
+    return products; // Extraemos los _id y los devolvemos como strings
+}
 const save = async(product) => {
     const products = await productsRepository.getAll();
     const exist = products.find(item => item.title == product.title)
@@ -46,6 +44,7 @@ export {
     getById,
     getAll,
     getAllByPage,
+    getIdsByTitle,
     save,
     update,
     eliminate
