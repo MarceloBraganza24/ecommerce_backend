@@ -22,10 +22,6 @@ export default class TicketsDao {
         });
         return tickets; 
     }
-    /* getAllByPageAndEmail = async (query, { page, limit }) => {
-        const tickets = await ticketsModel.paginate(query, { page, limit });
-        return tickets; 
-    } */
     getAllByPageAndEmail = async (query, { page, limit }) => {
         const tickets = await ticketsModel.paginate(query, { 
             page, 
@@ -42,6 +38,10 @@ export default class TicketsDao {
     save = async(ticket) => {
         const ticketSaved = await ticketsModel.create(ticket);
         return ticketSaved;
+    }
+    update = async(id,ticket) => {
+        const ticketUpdated = await ticketsModel.findByIdAndUpdate(id,ticket);
+        return ticketUpdated;
     }
     eliminate = async (id) => {
         const ticketEliminated = await ticketsModel.deleteOne({ _id: id });

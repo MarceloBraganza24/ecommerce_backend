@@ -44,6 +44,16 @@ const ticketsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    user_role: {
+        type: String,
+        required: true
+    },
+    visibility: {
+        user: {
+            type: Boolean,
+            default: true
+        }
+    }
 });
 
 ticketsSchema.pre('findOne', function() {

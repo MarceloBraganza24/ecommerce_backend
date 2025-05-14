@@ -27,6 +27,11 @@ const save = async (ticket) => {
     const ticketSaved = await ticketsManager.save(newTicket);
     return ticketSaved;
 }
+const update = async(id,ticket) => {
+    ticket.visibility.user = false;
+    const ticketUpdated = await ticketsManager.update(id,ticket);
+    return ticketUpdated;
+}
 const eliminate = async(id) => {
     const ticketEliminated = await ticketsManager.eliminate(id);
     return ticketEliminated;
@@ -36,6 +41,7 @@ export {
     getById,
     save,
     eliminate,
+    update,
     getAllByPageAndEmail,
     getAllByPage
 }

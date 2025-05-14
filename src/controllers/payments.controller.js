@@ -50,7 +50,8 @@ const createPreferencePurchase = async (req, res) => {
                 shippingAddress,
                 deliveryMethod,
                 user_cart_id,
-                items_to_save: itemsToSave
+                items_to_save: itemsToSave,
+                user_role: user.role
             },
             back_urls: {
                 success: 'https://google.com',
@@ -59,7 +60,7 @@ const createPreferencePurchase = async (req, res) => {
             },
             auto_return: "approved"
         };
-
+        
         const preference = new Preference(client);
         const response = await preference.create({ body: preferenceData });
 
@@ -87,6 +88,7 @@ const webhookPayment = async (req, res) => {
                 const shippingAddress = payment.metadata?.shipping_address;
                 const deliveryMethod = payment.metadata?.delivery_method;
                 const user_cart_id = payment.metadata?.user_cart_id;
+                const user_role = payment.metadata?.user_role;
 
                 const newTicket = {
                     mp_payment_id: payment.id,
@@ -96,9 +98,9 @@ const webhookPayment = async (req, res) => {
                     items: itemsFiltered,
                     shippingAddress,
                     deliveryMethod,
-                    purchase_datetime: payment.date_created
+                    purchase_datetime: payment.date_created,
+                    user_role: user_role?user_role:'user'
                 }
-                //console.log(newTicket.items)
                 const ticketSaved = await ticketsService.save(newTicket);
                 await cartsService.purchase(user_cart_id);
                 console.log(`Pago aprobado y guardado: ${payment.id}`);

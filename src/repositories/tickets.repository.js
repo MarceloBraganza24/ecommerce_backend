@@ -24,6 +24,10 @@ export default class TicketsRepository {
         const ticketSaved = await this.dao.save(ticket);
         return ticketSaved;
     }
+    update = async(id,ticket) => {
+        const ticketUpdated = await this.dao.update(id,ticket);
+        return ticketUpdated;
+    }
     eliminate = async(id) => {
         const ticketEliminated = await this.dao.eliminate(id);
         return ticketEliminated;

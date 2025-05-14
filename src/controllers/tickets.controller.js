@@ -156,7 +156,7 @@ const save = async (req, res) => {
 
 const saveSale = async (req, res) => {
     try {
-        const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_cart_id } = req.body;
+        const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_cart_id,user_role } = req.body;
         const itemsFiltered = items.map(item => ({
             product: item.product._id, // _id del producto
             quantity: item.quantity // Cantidad del producto
@@ -166,11 +166,24 @@ const saveSale = async (req, res) => {
             payer_email,
             items: itemsFiltered,
             deliveryMethod,
+            user_role,
             purchase_datetime
         }
         const ticket = await ticketsService.save(newTicket);
         await cartsService.purchase(user_cart_id);
         res.sendSuccessNewResourse(ticket);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
+const hiddenVisibility = async (req, res) => {
+    try {
+        const { tid } = req.params;
+        const ticket = await ticketsService.getById(tid);
+        const updatedTicket = await ticketsService.update(tid, ticket);
+        res.sendSuccessNewResourse(updatedTicket);
+
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);
@@ -193,6 +206,7 @@ export {
     getById,
     saveSale,
     save,
+    hiddenVisibility,
     eliminate,
     getAllByPageAndEmail,
     getAllByPage
