@@ -25,7 +25,7 @@ const getAllByPage = async (req, res) => {
 } 
 const getAllByPageAndEmail = async (req, res) => {
     try {
-        const { page = 1, limit = 25, search = "", email } = req.query;
+        const { page = 1, limit = 10, search = "", email } = req.query;
 
         const query = {};
 
@@ -157,10 +157,14 @@ const save = async (req, res) => {
 const saveSale = async (req, res) => {
     try {
         const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_cart_id } = req.body;
+        const itemsFiltered = items.map(item => ({
+            product: item.product._id, // _id del producto
+            quantity: item.quantity // Cantidad del producto
+        }));
         const newTicket = {
             amount,
             payer_email,
-            items,
+            items: itemsFiltered,
             deliveryMethod,
             purchase_datetime
         }

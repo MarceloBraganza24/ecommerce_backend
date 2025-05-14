@@ -9,6 +9,14 @@ const createPreferencePurchase = async (req, res) => {
     try {
         const { items,user,shippingAddress,deliveryMethod,discount,user_cart_id } = req.body;
 
+        const itemsToSave = items.map(item => ({
+            id: item.product._id,
+            title: item.product.title,
+            unit_price: Number(item.product.price),
+            quantity: item.quantity,
+            currency_id: "ARS"
+        }));
+
         const itemsFormateados = items.map(item => ({
             id: item.product._id,
             title: item.product.title,
@@ -42,7 +50,7 @@ const createPreferencePurchase = async (req, res) => {
                 shippingAddress,
                 deliveryMethod,
                 user_cart_id,
-                user_id: user._id,
+                items_to_save: itemsToSave
             },
             back_urls: {
                 success: 'https://google.com',
@@ -71,25 +79,29 @@ const webhookPayment = async (req, res) => {
             const payment = await paymentClient.get({ id: paymentId });
   
             if (payment.status === 'approved') {
-                const items = payment.additional_info?.items || [];
+                const items = payment.metadata?.items_to_save;
+                const itemsFiltered = items.map(item => ({
+                    product: item.id,
+                    quantity: parseInt(item.quantity, 10)
+                }));
                 const shippingAddress = payment.metadata?.shipping_address;
                 const deliveryMethod = payment.metadata?.delivery_method;
                 const user_cart_id = payment.metadata?.user_cart_id;
-                const user_id = payment.metadata?.user_id;
 
                 const newTicket = {
                     mp_payment_id: payment.id,
                     status: payment.status,
                     amount: payment.transaction_amount,
                     payer_email: payment.payer.email,
-                    items,
+                    items: itemsFiltered,
                     shippingAddress,
                     deliveryMethod,
                     purchase_datetime: payment.date_created
                 }
+                //console.log(newTicket.items)
                 const ticketSaved = await ticketsService.save(newTicket);
                 await cartsService.purchase(user_cart_id);
-                //console.log(`Pago aprobado y guardado: ${payment.id}`);
+                console.log(`Pago aprobado y guardado: ${payment.id}`);
                 return res.sendSuccessNewResourse(ticketSaved);
             }
         }

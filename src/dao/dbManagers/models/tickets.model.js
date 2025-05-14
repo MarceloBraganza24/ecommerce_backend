@@ -18,9 +18,15 @@ const ticketsSchema = new mongoose.Schema({
     payer_email: String,
     items: [
         {
-            title: String,
-            unit_price: Number,
-            quantity: Number
+            product: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'products', // Referencia al modelo de productos
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true
+            }
         }
     ],
     shippingAddress: {
@@ -38,6 +44,14 @@ const ticketsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+});
+
+ticketsSchema.pre('findOne', function() {
+    this.populate('items.product'); // Asegura que los productos se "populen" correctamente
+});
+
+ticketsSchema.pre('find', function() {
+    this.populate('items.product'); // Igualmente para el find
 });
 
 ticketsSchema.plugin(mongoosePaginate);
