@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: 'http://localhost:5173', // o donde esté corriendo tu frontend
     credentials: true
-  }));
+}));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 

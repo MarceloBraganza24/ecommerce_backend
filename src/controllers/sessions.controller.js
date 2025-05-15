@@ -20,14 +20,15 @@ const singIn = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password, last_connection } = req.body;
+        const { email, password } = req.body;
+        const last_connection = new Date();
         if( !email || !password) return res.sendClientError('incomplete values');
         const accessToken = await usersService.login(password, email,last_connection);
         res.cookie('TokenJWT', accessToken, {
-            //httpOnly: true,
-            //secure: true, // Asegurate de estar en HTTPS en producción
+            httpOnly: true,       // Oculta cookie al frontend (más seguro)
+            secure: false,        // IMPORTANTE: en desarrollo no debe estar en true
             sameSite: 'Lax',
-            maxAge: 60 * 60 * 1000, // 1 hora
+            maxAge: 60 * 60 * 1000,
             path: '/',
         });
         res.sendSuccess(accessToken);
@@ -42,24 +43,27 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        const cookie = req.query.cookie;
-        const { last_connection } = req.body;
-        const userVerified = jwt.verify(cookie, config.privateKeyJWT);
+        const token = req.cookies.TokenJWT;
+        const last_connection = new Date();
+        const userVerified = jwt.verify(token, config.privateKeyJWT);
         const userUpdated = await usersService.logOut(userVerified.user,last_connection)
+        res.clearCookie('TokenJWT', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Lax',
+            path: '/',
+        });
         res.sendSuccess({ userUpdated: userUpdated });
     } catch (error) {
-        if(error instanceof UserAlreadyExists || error instanceof UserByEmailExists) {
-            return res.sendClientError(error.message);
-        }
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
+        req.logger?.error(error.message);
+        res.sendServerError('Error al cerrar sesión');
     }
-}
+};
 
 const current = async(req,res) =>{
     try {
-        const cookie = req.query.cookie;
-        const userVerified = jwt.verify(cookie, config.privateKeyJWT);
+        const token = req.cookies.TokenJWT;
+        const userVerified = jwt.verify(token, config.privateKeyJWT);
         const userByEmail = await usersService.getByEmail(userVerified.user.email);
         const user = await usersService.getCurrent(userByEmail);
         if(user)return res.sendSuccess(user)
