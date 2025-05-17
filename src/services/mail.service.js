@@ -12,9 +12,9 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async(email) => {
     await transporter.sendMail({
-        from: 'gmail de marcelo braganza',
+        from: `"Marcelo Braganza" <${config.userNodemailer}>`,
         to: email.to,
         subject: email.subject,
         html: email.html
     });
-}
+};

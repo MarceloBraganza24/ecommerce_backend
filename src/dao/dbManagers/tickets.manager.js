@@ -40,19 +40,6 @@ export default class TicketsDao {
 
         return tickets; 
     }
-    /* getAllByPageAndEmail = async (query, { page, limit }) => {
-        const tickets = await ticketsModel.paginate(query, { 
-            page, 
-            limit,
-            populate: [
-                {
-                    path: 'items.product', // Este es el campo que contiene la referencia al producto
-                    select: 'title description images' // Los campos que deseas seleccionar del producto
-                }
-            ]
-        });
-        return tickets; 
-    } */
     save = async(ticket) => {
         const ticketSaved = await ticketsModel.create(ticket);
         return ticketSaved;
