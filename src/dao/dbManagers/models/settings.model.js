@@ -22,6 +22,14 @@ const settingsSchema = new mongoose.Schema({
     secondaryColor: {
         type: String,
         default: '#ffffff'
+    },
+    accentColor: {
+        type: String,
+        default: '#f39c12'
+    },
+    phoneNumbers: {
+        type: [String], // Arreglo de teléfonos como strings
+        default: []
     }
 }, {
     timestamps: true // Crea automáticamente createdAt y updatedAt
