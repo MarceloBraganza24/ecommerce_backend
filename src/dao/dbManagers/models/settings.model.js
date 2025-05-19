@@ -30,7 +30,23 @@ const settingsSchema = new mongoose.Schema({
     phoneNumbers: {
         type: [String], // Arreglo de teléfonos como strings
         default: []
-    }
+    },
+    sliderLogos: {
+        type: [String], // Arreglo de teléfonos como strings
+        default: []
+    },
+    siteImages: {
+        type: [String], // Arreglo de teléfonos como strings
+        default: []
+    },
+    aboutText: {
+        type: String,
+        default: ''
+    },
+    footerLogoText: {
+        type: String,
+        default: ''
+    },
 }, {
     timestamps: true // Crea automáticamente createdAt y updatedAt
 });

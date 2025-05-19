@@ -1,5 +1,5 @@
 import * as usersService from '../services/users.service.js';
-import { UserByEmailExists, InvalidCredentials } from "../utils/custom.exceptions.js";
+import { UserByEmailExists, InvalidCredentials,ExpiredToken } from "../utils/custom.exceptions.js";
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 
