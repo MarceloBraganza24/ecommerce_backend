@@ -8,12 +8,12 @@ const settingsSchema = new mongoose.Schema({
         default: ''
     },
     contactEmail: {
-        type: String,
-        default: ''
-    },
-    logoUrl: {
-        type: String,
-        default: ''
+        type: [{
+            email: { type: String, required: true },
+            label: { type: String, default: 'General' },
+            selected: { type: Boolean, default: false }
+        }],
+        default: []
     },
     primaryColor: {
         type: String,
@@ -32,12 +32,18 @@ const settingsSchema = new mongoose.Schema({
         default: []
     },
     sliderLogos: {
-        type: [String], // Arreglo de teléfonos como strings
+        type: [String], // Arreglo de imagenes sliders como strings
         default: []
     },
     siteImages: {
-        type: [String], // Arreglo de teléfonos como strings
-        default: []
+        type: new mongoose.Schema({
+            favicon: { type: String, default: '' },
+            logoStore: { type: String, default: '' },
+            homeImage: { type: String, default: '' },
+            aboutImage: { type: String, default: '' },
+            contactImage: { type: String, default: '' }
+        }, { _id: false }),
+        default: () => ({})
     },
     aboutText: {
         type: String,

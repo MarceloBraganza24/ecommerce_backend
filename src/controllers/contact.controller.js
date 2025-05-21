@@ -2,7 +2,8 @@ import {sendEmail} from '../services/mail.service.js';
 
 const emailFromUserToAdmin = async (req, res) => {
     const { first_name, last_name, email, message } = req.body; 
-    if (!first_name || !last_name || !email || !message) {
+    console.log(req.body)
+    /* if (!first_name || !last_name || !email || !message) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
     try {
@@ -20,7 +21,7 @@ const emailFromUserToAdmin = async (req, res) => {
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);
-    }
+    } */
 }
 
 export {

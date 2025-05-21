@@ -6,8 +6,8 @@ const getConfig = async () => {
     const settings = await settingsManager.getConfig();
     return settings;
 }
-const updateConfig = async () => {
-    const configurationUpdated = await settingsManager.updateConfig();
+const updateConfig = async (data) => {
+    const configurationUpdated = await settingsManager.updateConfig(data);
     return configurationUpdated;
 }
 
