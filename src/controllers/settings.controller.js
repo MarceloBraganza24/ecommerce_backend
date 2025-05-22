@@ -133,7 +133,8 @@ export const getConfig = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }; */
-export const updateConfig = async (req, res) => {
+
+/* export const updateConfig = async (req, res) => {
     try {
         const parsedData = JSON.parse(req.body.data);
         const images = req.files;
@@ -145,7 +146,7 @@ export const updateConfig = async (req, res) => {
         console.log('files:', images);
         console.log('---- FIN DE DATOS ----');
 
-        /* const siteImagesUrls = req.body.siteImagesUrls ? JSON.parse(JSON.stringify(req.body.siteImagesUrls)) : {};
+        const siteImagesUrls = req.body.siteImagesUrls ? JSON.parse(JSON.stringify(req.body.siteImagesUrls)) : {};
 
         const normalizeUrl = (url) => {
             if (!url) return '';
@@ -182,7 +183,7 @@ export const updateConfig = async (req, res) => {
             ...parsedData,
             siteImages,
             sliderLogos
-        }; */
+        };
 
         //console.log(newSettings)
 
@@ -192,7 +193,143 @@ export const updateConfig = async (req, res) => {
         console.error(error);
         res.status(500).json({ error: error.message });
     }
+}; */
+
+
+/* export const updateConfig = async (req, res) => {
+    try {
+        const parsedData = JSON.parse(req.body.data); // Viene como string
+        const images = req.files;
+
+        console.log('parsedData: ',parsedData)
+        console.log(' ')
+        console.log('images: ',images)
+
+        const parsedData = JSON.parse(req.body.data);
+
+        // 1. Actualizar imágenes individuales (favicon, logoStore, etc.)
+        parsedData.siteImages = parsedData.siteImages || {};
+
+        const singleImageFields = ['favicon', 'logoStore', 'homeImage', 'aboutImage', 'contactImage'];
+
+        singleImageFields.forEach(field => {
+        if (req.files[field] && req.files[field][0]) {
+            // Si llegó archivo nuevo para este campo, reemplazar URL antigua por la nueva
+            parsedData.siteImages[field] = 'uploads/' + req.files[field][0].filename;
+        }
+        // Si no llegó archivo, mantiene la URL antigua que ya está en parsedData.siteImages[field]
+        });
+
+        // 2. Actualizar sliderLogos (es un array de URLs)
+
+        let existingSliderLogos = parsedData.sliderLogos || [];  // URLs antiguas
+
+        // Si llegaron archivos nuevos para sliderLogos, los agregamos como URLs nuevas
+        if (req.files.sliderLogos) {
+        const newSliderUrls = req.files.sliderLogos.map(file => 'uploads/' + file.filename);
+        // Concatenamos las nuevas URLs con las antiguas
+        existingSliderLogos = existingSliderLogos.concat(newSliderUrls);
+        }
+
+        // Asignamos el array completo actualizado
+        parsedData.sliderLogos = existingSliderLogos;
+
+        // const updatedConfig = await settingsService.updateConfig(newSettings);
+        // res.json(updatedConfig);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+}; */
+
+
+import fs from 'fs';
+import path from 'path';
+
+export const updateConfig = async (req, res) => {
+  try {
+    const parsedData = JSON.parse(req.body.data); // viene como string
+    const images = req.files; // multer procesa esto
+
+    /* const siteId = parsedData._id;
+    const site = await SiteModel.findById(siteId);
+
+    if (!site) {
+      return res.status(404).json({ message: 'Configuración de sitio no encontrada' });
+    } */
+
+    // === 1. SITE IMAGES ===
+    const siteImageKeys = ['favicon', 'logoStore', 'homeImage', 'aboutImage', 'contactImage'];
+    const updatedSiteImages = { ...parsedData.siteImages };
+
+    for (const key of siteImageKeys) {
+      if (images[key]) {
+        const newFile = images[key][0];
+        const newPath = path.join('uploads', newFile.filename).replace(/\\/g, '/');
+
+        // Si había una imagen anterior, eliminarla
+        if (parsedData.siteImages[key] && fs.existsSync(parsedData.siteImages[key])) {
+          fs.unlinkSync(parsedData.siteImages[key]);
+        }
+
+        updatedSiteImages[key] = newPath;
+      } else {
+        // Si no se actualizó esta imagen, conservar la actual
+        updatedSiteImages[key] = parsedData.siteImages[key];
+      }
+    }
+
+    // === 2. SLIDER LOGOS ===
+    const oldSliderLogos = parsedData.sliderLogos || [];
+    const incomingSliderLogos = parsedData.sliderLogos || [];
+
+    // Nuevas imágenes desde frontend (agregadas con input type="file")
+    const newSliderFiles = images['sliderLogos'] || [];
+    const newSliderPaths = newSliderFiles.map((file) =>
+      path.join('uploads', file.filename).replace(/\\/g, '/')
+    );
+
+    // Nueva lista total (las que quedaron + las nuevas)
+    const updatedSliderLogos = [...incomingSliderLogos.filter(Boolean), ...newSliderPaths];
+
+    // Ver cuáles fueron eliminadas (estaban antes pero no están más)
+    const deletedSliderLogos = oldSliderLogos.filter(
+      (oldPath) => !updatedSliderLogos.includes(oldPath)
+    );
+
+    // Borramos del disco las imágenes eliminadas
+    for (const oldLogo of deletedSliderLogos) {
+      if (fs.existsSync(oldLogo)) {
+        fs.unlinkSync(oldLogo);
+      }
+    }
+
+    // === 3. ACTUALIZACIÓN EN BD ===
+    /* const updatedSite = await SiteModel.findByIdAndUpdate(
+      siteId,
+      {
+        ...parsedData,
+        siteImages: updatedSiteImages,
+        sliderLogos: updatedSliderLogos,
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: 'Configuración actualizada', data: updatedSite }); */
+    const newSettings = {
+        ...parsedData,
+        siteImages: updatedSiteImages,
+        sliderLogos: updatedSliderLogos,
+    };
+    const updatedConfig = await settingsService.updateConfig(newSettings);
+    res.json(updatedConfig);
+  } catch (error) {
+    console.error('Error actualizando configuración del sitio:', error);
+    res.status(500).json({ message: 'Error actualizando configuración del sitio' });
+  }
 };
+
 
 
 

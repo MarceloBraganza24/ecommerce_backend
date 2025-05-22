@@ -6,8 +6,6 @@ import uploader from "../utils/upload.js";
 export default class SettingsRouter extends Router {
     init() {
         this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getConfig);
-        //this.put('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updateConfig);
-
         this.put('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, uploader.fields([
                 { name: 'favicon', maxCount: 1 },
                 { name: 'logoStore', maxCount: 1 },
