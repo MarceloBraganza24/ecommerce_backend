@@ -76,6 +76,7 @@ const purchase = async (cid) => {
             if (product.stock >= quantity) {
                 amount += product.price * quantity;
                 product.stock -= quantity;
+                //product.number_sales = product.number_sales + quantity
                 await productsRepository.update(product._id, product);
             } else {
                 outStock.push({ product, quantity });

@@ -33,6 +33,10 @@ const productsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    number_sales: {
+        type: Number,
+        default: 0,
+    },
     camposExtras: {
         type: Map,       // Almacena clave-valor dinámicamente
         of: String
