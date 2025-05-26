@@ -71,6 +71,12 @@ export class CouponExists extends Error {
         this.name = this.constructor.name;
     }
 }
+export class ExpiredCoupon extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
 export class PurchaseExists extends Error {
     constructor(message) {
         super(message);
