@@ -82,7 +82,12 @@ const saveSale = async (req, res) => {
         const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_cart_id,user_role } = req.body;
         const itemsFiltered = items.map(item => ({
             product: item.product._id, // _id del producto
-            quantity: item.quantity // Cantidad del producto
+            quantity: item.quantity, // Cantidad del producto
+            snapshot: {
+                title: item.product.title,
+                price: item.product.price,
+                image: item.product.images[0],
+            }
         }));
         const newTicket = {
             amount,

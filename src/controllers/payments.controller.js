@@ -14,7 +14,8 @@ const createPreferencePurchase = async (req, res) => {
             title: item.product.title,
             unit_price: Number(item.product.price),
             quantity: item.quantity,
-            currency_id: "ARS"
+            currency_id: "ARS",
+            images: item.product.images,
         }));
 
         const itemsFormateados = items.map(item => ({
@@ -83,7 +84,12 @@ const webhookPayment = async (req, res) => {
                 const items = payment.metadata?.items_to_save;
                 const itemsFiltered = items.map(item => ({
                     product: item.id,
-                    quantity: parseInt(item.quantity, 10)
+                    quantity: parseInt(item.quantity, 10),
+                    snapshot: {
+                        title: item.title,
+                        price: item.unit_price,
+                        image: item.images[0],
+                    }
                 }));
                 const shippingAddress = payment.metadata?.shipping_address;
                 const deliveryMethod = payment.metadata?.delivery_method;

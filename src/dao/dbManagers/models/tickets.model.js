@@ -26,6 +26,11 @@ const ticketsSchema = new mongoose.Schema({
             quantity: {
                 type: Number,
                 required: true
+            },
+            snapshot: { // <- esta es la copia del producto en el momento de la compra
+                title: String,
+                price: Number,
+                image: String,
             }
         }
     ],
