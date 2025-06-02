@@ -31,6 +31,49 @@ export default class Products {
         const productUpdated = await productsModel.updateOne({ _id: pid }, productToReplace);
         return productUpdated;
     }
+    updatePricesByCategories = async (categories, percentage) => {
+        const factor = 1 + (percentage / 100);
+
+        const result = await productsModel.updateMany(
+            { category: { $in: categories } },
+            [
+                {
+                    $set: {
+                        originalPrice: {
+                            $cond: [
+                                { $ifNull: ["$originalPrice", false] },
+                                "$originalPrice",
+                                "$price"
+                            ]
+                        },
+                        price: { $round: [{ $multiply: ["$price", factor] }, 0] } // 🎯 redondea sin decimales
+                    }
+                }
+            ]
+        );
+
+        return result;
+    };
+    restorePricesByCategories = async (categories) => {
+        const result = await productsModel.updateMany(
+            {
+                category: { $in: categories },
+                originalPrice: { $exists: true, $ne: null }
+            },
+            [
+                {
+                    $set: {
+                        price: { $round: ["$originalPrice", 0] }
+                    }
+                },
+                {
+                    $unset: "originalPrice"
+                }
+            ]
+        );
+        console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
+        return result;
+    };
     eliminate = async (pid) => {
         const productEliminated = await productsModel.deleteOne({ _id: pid });
         return productEliminated;

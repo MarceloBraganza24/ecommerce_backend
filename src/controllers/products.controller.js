@@ -146,6 +146,38 @@ const update = async (req, res) => {
     }
 }
 
+const updatePricesByCategories = async (req, res) => {
+    try {
+        const { categories, percentage } = req.body;
+        const result = await productsService.updatePricesByCategories(categories, percentage);
+        res.json({
+            message: 'Precios actualizados correctamente.',
+            modifiedCount: result.modifiedCount
+        });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
+const restorePricesByCategories = async (req, res) => {
+    try {
+        const { categories } = req.body;
+
+        if (!categories || !Array.isArray(categories) || categories.length === 0) {
+            return res.status(400).json({ error: 'Debes seleccionar al menos una categoría' });
+        }
+
+        const result = await productsService.restorePricesByCategories(categories);
+
+        return res.status(200).json({ 
+            message: 'Precios restaurados correctamente', 
+            modifiedCount: result.modifiedCount 
+        });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
 const eliminate = async (req, res) => {
     try {
         const { pid } = req.params;
@@ -171,5 +203,7 @@ export {
     getById,
     save,
     update,
+    updatePricesByCategories,
+    restorePricesByCategories,
     eliminate
 }

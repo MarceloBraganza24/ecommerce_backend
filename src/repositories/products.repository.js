@@ -26,6 +26,14 @@ export default class ProductsRepository {
         const productUpdated = await this.dao.update(pid, productToReplace);
         return productUpdated;
     }
+    updatePricesByCategories = async(categories, percentage) => {
+        const productsUpdated = await this.dao.updatePricesByCategories(categories, percentage);
+        return productsUpdated;
+    }
+    restorePricesByCategories = async(categories) => {
+        const productsUpdated = await this.dao.restorePricesByCategories(categories);
+        return productsUpdated;
+    }
     eliminate = async(pid) => {
         const productEliminated = await this.dao.eliminate(pid);
         return productEliminated;

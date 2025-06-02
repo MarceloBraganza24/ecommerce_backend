@@ -35,6 +35,14 @@ const update = async(pid, productToReplace) => {
     const productUpdated = await productsRepository.update(pid, productToReplace);
     return productUpdated;
 }
+const updatePricesByCategories = async(categories, percentage) => {
+    const productsUpdated = await productsRepository.updatePricesByCategories(categories, percentage);
+    return productsUpdated;
+}
+const restorePricesByCategories = async(categories) => {
+    const productsUpdated = await productsRepository.restorePricesByCategories(categories);
+    return productsUpdated;
+}
 const eliminate = async(pid) => {
     const productEliminated = await productsRepository.eliminate(pid);
     return productEliminated;
@@ -47,5 +55,7 @@ export {
     getIdsByTitle,
     save,
     update,
+    updatePricesByCategories,
+    restorePricesByCategories,
     eliminate
 }
