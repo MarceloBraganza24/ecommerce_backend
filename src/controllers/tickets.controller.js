@@ -1,6 +1,5 @@
 import * as ticketsService from '../services/tickets.service.js';
 import * as cartsService from '../services/carts.service.js';
-import * as productsService from '../services/products.service.js';
 
 const getAll = async (req, res) => {
     try {
@@ -129,6 +128,84 @@ const eliminate = async (req, res) => {
     }
 }
 
+        
+const massDelete = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'IDs inválidos' });
+    }
+
+    await ticketsService.massDelete(ids); // asumimos que tu service tiene esta función
+    res.sendSuccess('Tickets eliminados');
+
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+const massDeletePermanent = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'IDs inválidos' });
+    }
+
+    await ticketsService.massDeletePermanent(ids); // asumimos que tu service tiene esta función
+    res.sendSuccess('Tickets eliminados permanentemente');
+
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+const massRestore = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'IDs inválidos' });
+        }
+
+        await ticketsService.massRestore(ids); // asumimos que tu service tiene esta función
+        res.sendSuccess('Tickets restaurados');
+
+    } catch (error) {
+        req.logger.error(error.message);
+        res.sendServerError(error.message);
+    }
+};
+
+const updateSoftDelete = async (req, res) => {
+    try {
+        const { tid } = req.params;
+        const updatedTicket = await ticketsService.updateSoftDelete(tid)
+        res.status(200).json({ message: 'Ticket eliminado (soft delete)', product: updatedTicket });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} 
+const updateRestoreProduct = async (req, res) => {
+    try {
+        const { tid } = req.params;
+        const updatedTicket = await ticketsService.updateRestoreProduct(tid)
+        res.status(200).json({ message: 'Ticket eliminado (soft delete)', product: updatedTicket });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} 
+
+const getDeleted = async (req, res) => {
+    try {
+        const deletedTickets = await ticketsService.getDeleted();
+        res.status(200).json({ status: 'success', payload: deletedTickets });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} 
+
 export {
     getAll,
     getById,
@@ -137,5 +214,11 @@ export {
     hiddenVisibility,
     eliminate,
     getAllByPageAndEmail,
-    getAllByPage
+    getAllByPage,
+    getDeleted,
+    updateRestoreProduct,
+    updateSoftDelete,
+    massRestore,
+    massDelete,
+    massDeletePermanent
 }

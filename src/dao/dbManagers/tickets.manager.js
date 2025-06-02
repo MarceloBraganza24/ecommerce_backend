@@ -52,4 +52,47 @@ export default class TicketsDao {
         const ticketEliminated = await ticketsModel.deleteOne({ _id: id });
         return ticketEliminated;
     }
+    massDelete = async (ids) => {
+        const ticketsEliminated = await ticketsModel.updateMany(
+            { _id: { $in: ids } },
+            { $set: { deleted: true, deletedAt: new Date() } }
+        );
+        return ticketsEliminated;
+    }
+    massDeletePermanent = async (ids) => {
+        const ticketsEliminated = await ticketsModel.deleteMany({ _id: { $in: ids } });
+        return ticketsEliminated;
+    }
+    massRestore = async (ids) => {
+        const ticketsEliminated = await ticketsModel.updateMany(
+            { _id: { $in: ids } },
+            { $set: { deleted: false, deletedAt: null } }
+        );
+        return ticketsEliminated;
+    }
+    restoreProducts = async (ids) => {
+        const restored = await ticketsModel.updateMany(
+            { _id: { $in: ids }, deleted: true },
+            { $set: { deleted: false, deletedAt: null } }
+        );
+        return restored;
+    }
+    updateSoftDelete = async (pid) => {
+        const tickets = await ticketsModel.findByIdAndUpdate(pid, { 
+            deleted: true, 
+            deletedAt: new Date() 
+        }, { new: true });
+        return tickets; 
+    }
+    updateRestoreProduct = async (pid) => {
+        const tickets = await ticketsModel.findByIdAndUpdate(
+            pid,
+            { 
+                deleted: false, 
+                deletedAt: null 
+            },
+            { new: true }
+        );
+        return tickets;
+    };
 }

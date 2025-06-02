@@ -32,4 +32,28 @@ export default class TicketsRepository {
         const ticketEliminated = await this.dao.eliminate(id);
         return ticketEliminated;
     }
+    massDelete = async(ids) => {
+        const ticketsEliminated = await this.dao.massDelete(ids);
+        return ticketsEliminated;
+    }
+    massDeletePermanent = async(ids) => {
+        const ticketsEliminated = await this.dao.massDeletePermanent(ids);
+        return ticketsEliminated;
+    }
+    massRestore = async(ids) => {
+        const ticketsEliminated = await this.dao.massRestore(ids);
+        return ticketsEliminated;
+    }
+    getDeleted = async() => {
+        const tickets = await this.dao.getDeleted();
+        return tickets;
+    }
+    updateSoftDelete = async(tid) => {
+        const ticketsUpdated = await this.dao.updateSoftDelete(tid);
+        return ticketsUpdated;
+    }
+    updateRestoreProduct = async(tid) => {
+        const ticketsUpdated = await this.dao.updateRestoreProduct(tid);
+        return ticketsUpdated;
+    }
 }

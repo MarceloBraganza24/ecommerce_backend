@@ -1,6 +1,5 @@
 import * as productsService from '../services/products.service.js';
 import { ProductExists } from '../utils/custom.exceptions.js';
-import {productsModel} from '../dao/dbManagers/models/products.model.js';
 
 const getAll = async (req, res) => {
     try {
@@ -11,60 +10,54 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 } 
-
-const getAllBy = async (req, res) => {
+const getDeleted = async (req, res) => {
     try {
-        const { page = 1, limit, ...filters } = req.query;
-
-        // Convertimos `page` y `limit` a números
-        const pageNumber = parseInt(page, 10);
-        const limitNumber = parseInt(limit);
-
-        // Construimos el filtro dinámico
-        const query = {};
-        Object.keys(filters).forEach((key) => {
-            query[key] = { $regex: filters[key], $options: "i" };
-        });
-
-        // Contamos el total de productos que cumplen con el filtro
-        const totalProducts = await productsModel.countDocuments(query);
-
-        // Calculamos el total de páginas
-        const totalPages = Math.ceil(totalProducts / limitNumber);
-
-        // Determinamos si hay páginas anteriores o siguientes
-        const hasPrevPage = pageNumber > 1;
-        const hasNextPage = pageNumber < totalPages;
-
-        // Definimos las páginas anterior y siguiente
-        const prevPage = hasPrevPage ? pageNumber - 1 : null;
-        const nextPage = hasNextPage ? pageNumber + 1 : null;
-
-        // Obtenemos los productos de la página actual
-        const products = await productsModel.find(query)
-            .skip((pageNumber - 1) * limitNumber)
-            .limit(limitNumber);
-
-        // Devolvemos la respuesta con la paginación
-        res.json({
-            data: products,
-            totalProducts,
-            totalPages,
-            currentPage: pageNumber,
-            hasPrevPage,
-            hasNextPage,
-            prevPage,
-            nextPage,
-        });
+        const deletedProducts = await productsService.getDeleted();
+        res.status(200).json({ status: 'success', payload: deletedProducts });
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
 } 
+const getAllBy = async (req, res) => {
+    try {
+        const { page = 1, limit = 8, sort, minPrice, maxPrice, ...filters } = req.query;
+
+        const result = await productsService.getAllBy(
+            { ...filters, minPrice, maxPrice, sort },
+            page,
+            limit
+        );
+
+        res.sendSuccess(result);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
 const getAllByPage = async (req, res) => {
     try {
-        const { page = 1, limit = 25, search = "" } = req.query;      
-        const query = search ? { title: { $regex: search, $options: "i" } } : {};
+        const { page = 1, limit = 25, search = "", field = "" } = req.query;
+
+        let query = {};
+        if (search) {
+            if (field === 'all') {
+                query = {
+                    $or: [
+                        { title: { $regex: search, $options: 'i' } },
+                        { description: { $regex: search, $options: 'i' } },
+                        { category: { $regex: search, $options: 'i' } },
+                        { state: { $regex: search, $options: 'i' } },
+                        { price: isNaN(search) ? undefined : Number(search) },
+                        { stock: isNaN(search) ? undefined : Number(search) },
+                    ].filter(Boolean) // elimina los undefined
+                };
+            } else if (['price', 'stock'].includes(field)) {
+                query[field] = isNaN(search) ? undefined : Number(search);
+            } else {
+                query[field] = { $regex: search, $options: "i" };
+            }
+        }
 
         const products = await productsService.getAllByPage(query, { page, limit });
         res.sendSuccess(products);
@@ -72,13 +65,36 @@ const getAllByPage = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
-} 
+};
+
+
+
 
 const getById = async (req, res) => {
     try {
         const { pid } = req.params;            
         const product = await productsService.getById(pid);
         res.sendSuccess(product);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} 
+const updateSoftDelete = async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const updatedProduct = await productsService.updateSoftDelete(pid)
+        res.status(200).json({ message: 'Producto eliminado (soft delete)', product: updatedProduct });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} 
+const updateRestoreProduct = async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const updatedProduct = await productsService.updateRestoreProduct(pid)
+        res.status(200).json({ message: 'Producto eliminado (soft delete)', product: updatedProduct });
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);
@@ -195,15 +211,67 @@ const eliminate = async (req, res) => {
         req.logger.error(error.message);
     }
 }
+const massDelete = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'IDs inválidos' });
+    }
+
+    await productsService.massDelete(ids); // asumimos que tu service tiene esta función
+    res.sendSuccess('Productos eliminados');
+
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+const massDeletePermanent = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'IDs inválidos' });
+    }
+
+    await productsService.massDeletePermanent(ids); // asumimos que tu service tiene esta función
+    res.sendSuccess('Productos eliminados permanentemente');
+
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+const massRestore = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'IDs inválidos' });
+        }
+
+        await productsService.massRestore(ids); // asumimos que tu service tiene esta función
+        res.sendSuccess('Productos restaurados');
+
+    } catch (error) {
+        req.logger.error(error.message);
+        res.sendServerError(error.message);
+    }
+};
+
 
 export {
     getAll,
+    getDeleted,
     getAllBy,
+    updateRestoreProduct,
     getAllByPage,
     getById,
+    updateSoftDelete,
     save,
     update,
     updatePricesByCategories,
     restorePricesByCategories,
-    eliminate
+    eliminate,
+    massRestore,
+    massDelete,
+    massDeletePermanent
 }

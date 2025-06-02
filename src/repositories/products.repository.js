@@ -6,14 +6,29 @@ export default class ProductsRepository {
         const product = await this.dao.getById(pid);
         return product;
     }
+    updateSoftDelete = async(pid) => {
+        const productsUpdated = await this.dao.updateSoftDelete(pid);
+        return productsUpdated;
+    }
+    updateRestoreProduct = async(pid) => {
+        const productsUpdated = await this.dao.updateRestoreProduct(pid);
+        return productsUpdated;
+    }
     getAll = async() => {
         const products = await this.dao.getAll();
+        return products;
+    }
+    getDeleted = async() => {
+        const products = await this.dao.getDeleted();
         return products;
     }
     getAllByPage = async(query, { page, limit }) => {
         const products = await this.dao.getAllByPage(query, { page, limit });
         return products;
     }
+    getAllBy = async (query, { page, limit, sort }) => {
+        return await this.dao.getAllBy(query, { page, limit, sort });
+    };
     getIdsByTitle = async(title) => {
         const products = await this.dao.getIdsByTitle(title);
         return products;
@@ -37,5 +52,17 @@ export default class ProductsRepository {
     eliminate = async(pid) => {
         const productEliminated = await this.dao.eliminate(pid);
         return productEliminated;
+    }
+    massDelete = async(ids) => {
+        const productsEliminated = await this.dao.massDelete(ids);
+        return productsEliminated;
+    }
+    massDeletePermanent = async(ids) => {
+        const productsEliminated = await this.dao.massDeletePermanent(ids);
+        return productsEliminated;
+    }
+    massRestore = async(ids) => {
+        const productsEliminated = await this.dao.massRestore(ids);
+        return productsEliminated;
     }
 }

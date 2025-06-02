@@ -36,6 +36,30 @@ const eliminate = async(id) => {
     const ticketEliminated = await ticketsManager.eliminate(id);
     return ticketEliminated;
 }
+const massDelete = async(ids) => {
+    const ticketsEliminated = await ticketsManager.massDelete(ids);
+    return ticketsEliminated;
+}
+const massDeletePermanent = async(ids) => {
+    const ticketsEliminated = await ticketsManager.massDeletePermanent(ids);
+    return ticketsEliminated;
+}
+const massRestore = async(ids) => {
+    const ticketsEliminated = await ticketsManager.massRestore(ids);
+    return ticketsEliminated;
+}
+const updateSoftDelete = async(tid) => {
+    const ticketUpdated = await ticketsManager.updateSoftDelete(tid);
+    return ticketUpdated;
+}
+const updateRestoreProduct = async(tid) => {
+    const ticketUpdated = await ticketsManager.updateRestoreProduct(tid);
+    return ticketUpdated;
+}
+const getDeleted = async() => {
+    const tickets = await ticketsManager.getDeleted();
+    return tickets;
+}
 export {
     getAll,
     getById,
@@ -43,5 +67,11 @@ export {
     eliminate,
     update,
     getAllByPageAndEmail,
-    getAllByPage
+    getAllByPage,
+    updateSoftDelete,
+    getDeleted,
+    massRestore,
+    massDeletePermanent,
+    massDelete,
+    updateRestoreProduct
 }

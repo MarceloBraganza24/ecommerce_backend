@@ -44,7 +44,9 @@ const productsSchema = new mongoose.Schema({
     camposExtras: {
         type: Map,       // Almacena clave-valor dinámicamente
         of: String
-    }
+    },
+    deleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null }
 });
 
 productsSchema.plugin(mongoosePaginate);

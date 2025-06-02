@@ -5,23 +5,56 @@ export default class Products {
         console.log('Working with products DB');
     }
     getById = async (pid) => {
-        const product = await productsModel.findById(pid);
+        const product = await productsModel.findById({ _id: pid, deleted: false });
         return product; 
     }
+    getDeleted = async () => {
+        const deletedProducts = await productsModel.find({ deleted: true }).lean();
+        return deletedProducts;
+    };
     getAll = async () => {
-        const products = await productsModel.find().lean();
+        const products = await productsModel.find({ deleted: false }).lean();
         return products; 
     }
-    getAllByPage = async (query, { page, limit }) => {
-        const products = await productsModel.paginate(query, { page, limit });
+    updateSoftDelete = async (pid) => {
+        const products = await productsModel.findByIdAndUpdate(pid, { 
+            deleted: true, 
+            deletedAt: new Date() 
+        }, { new: true });
+        return products; 
+    }
+    updateRestoreProduct = async (pid) => {
+        const product = await productsModel.findByIdAndUpdate(
+            pid,
+            { 
+                deleted: false, 
+                deletedAt: null 
+            },
+            { new: true }
+        );
+        return product;
+    };
+    getAllBy = async (query = {}, { page, limit, sort }) => {
+        const fullQuery = { ...query, deleted: false };
+        const result = await productsModel.paginate(fullQuery, {
+            page,
+            limit,
+            sort,
+        });
+        return result;
+    };
+    getAllByPage = async (query = {}, { page, limit }) => {
+        const fullQuery = { ...query, deleted: false };
+
+        const products = await productsModel.paginate(fullQuery, { page, limit });
         return products; 
     }
     getIdsByTitle = async (title) => {
         const products = await productsModel.find(
-            { title: { $regex: title, $options: "i" } },
-            { _id: 1 } // solo devuelve el _id
+            { title: { $regex: title, $options: "i" }, deleted: false },
+            { _id: 1 }
         );
-        return products.map(p => p._id.toString()); // Convierte los _id a string
+        return products.map(p => p._id.toString());
     }
     save = async (product) => {
         const productSaved = await productsModel.create(product);
@@ -78,4 +111,30 @@ export default class Products {
         const productEliminated = await productsModel.deleteOne({ _id: pid });
         return productEliminated;
     }
+    massDelete = async (ids) => {
+        const productsEliminated = await productsModel.updateMany(
+            { _id: { $in: ids } },
+            { $set: { deleted: true, deletedAt: new Date() } }
+        );
+        return productsEliminated;
+    }
+    massDeletePermanent = async (ids) => {
+        const productsEliminated = await productsModel.deleteMany({ _id: { $in: ids } });
+        return productsEliminated;
+    }
+    massRestore = async (ids) => {
+        const productsEliminated = await productsModel.updateMany(
+            { _id: { $in: ids } },
+            { $set: { deleted: false, deletedAt: null } }
+        );
+        return productsEliminated;
+    }
+    restoreProducts = async (ids) => {
+        const restored = await productsModel.updateMany(
+            { _id: { $in: ids }, deleted: true },
+            { $set: { deleted: false, deletedAt: null } }
+        );
+        return restored;
+    }
+
 }

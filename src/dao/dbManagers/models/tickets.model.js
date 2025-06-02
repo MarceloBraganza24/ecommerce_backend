@@ -58,7 +58,9 @@ const ticketsSchema = new mongoose.Schema({
             type: Boolean,
             default: true
         }
-    }
+    },
+    deleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null }
 });
 
 ticketsSchema.pre('findOne', function() {
