@@ -9,17 +9,24 @@ export default class TicketsDao {
         const ticket = await ticketsModel.findById(id).lean();
         return ticket;
     }
-    getAllByPage = async (query, { page, limit }) => {
-        const tickets = await ticketsModel.paginate(query, { 
+    getDeleted = async () => {
+        const deletedTickets = await ticketsModel.find({ deleted: true }).lean();
+        return deletedTickets;
+    };
+    getAllByPage = async (query = {}, { page, limit }) => {
+        const fullQuery = { ...query, deleted: false };
+
+        const tickets = await ticketsModel.paginate(fullQuery, { 
             page, 
             limit,
             populate: [
                 {
-                    path: 'items.product', // Este es el campo que contiene la referencia al producto
-                    select: 'title description images' // Los campos que deseas seleccionar del producto
+                    path: 'items.product',
+                    select: 'title description images'
                 }
             ]
         });
+
         return tickets; 
     }
     getAllByPageAndEmail = async (query, { page, limit }) => {
