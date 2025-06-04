@@ -5,13 +5,6 @@ import { ticketsModel } from '../dao/dbManagers/models/tickets.model.js'
 
 export default class TicketsRouter extends Router {
     init() {
-        /* this.get('/init-add-deleted-flag', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, async (req, res) => {
-            const result = await ticketsModel.updateMany(
-                { deleted: { $exists: false } },
-                { $set: { deleted: false, deletedAt: null } }
-            );
-            res.json(result);
-        }); */
         this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAll);
         this.get('/deleted', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getDeleted);
         this.get('/byPage', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAllByPage);

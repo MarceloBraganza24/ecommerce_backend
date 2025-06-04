@@ -10,7 +10,7 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-const getAllByPage = async (req, res) => {
+/* const getAllByPage = async (req, res) => {
     try {
         const { page = 1, limit = 25, search = "" } = req.query;      
         const query = search ? { title: { $regex: search, $options: "i" } } : {};
@@ -21,7 +21,38 @@ const getAllByPage = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
-} 
+}  */
+const getAllByPage = async (req, res) => {
+    try {
+        const { page = 1, limit = 25, search = "", field = "" } = req.query;
+
+        let query = {};
+        if (search) {
+            if (field === 'title') {
+                query['items.snapshot.title'] = { $regex: search, $options: 'i' };
+            } else if (field === 'all') {
+                query = {
+                    $or: [
+                        { 'items.snapshot.title': { $regex: search, $options: 'i' } },
+                        { code: { $regex: search, $options: 'i' } },
+                        { payer_email: { $regex: search, $options: 'i' } },
+                        { user_role: { $regex: search, $options: 'i' } },
+                        { amount: isNaN(search) ? undefined : Number(search) },
+                    ].filter(Boolean) // elimina los undefined
+                };
+            } else if (['amount'].includes(field)) {
+                query[field] = isNaN(search) ? undefined : Number(search);
+            } else {
+                query[field] = { $regex: search, $options: "i" };
+            }
+        }
+        const tickets = await ticketsService.getAllByPage(query, { page, limit });
+        res.sendSuccess(tickets);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
 const getAllByPageAndEmail = async (req, res) => {
     try {
         const { page = 1, limit = 10, search = "", email } = req.query;
