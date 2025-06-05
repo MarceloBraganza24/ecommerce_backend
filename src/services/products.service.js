@@ -5,10 +5,14 @@ import { ProductExists } from '../utils/custom.exceptions.js';
 const productsDao = new Products();
 const productsRepository = new ProductsRepository(productsDao);
 
-const getById = async(pid) => {
+/* const getById = async(pid) => {
     const product = await productsRepository.getById(pid);
     return product;
-}
+} */
+const getById = async (pid, session = null) => {
+    const product = await productsRepository.getById(pid, session);
+    return product;
+};
 const updateSoftDelete = async(pid) => {
     const productUpdated = await productsRepository.updateSoftDelete(pid);
     return productUpdated;
@@ -70,6 +74,26 @@ const save = async(product) => {
     const productSaved = await productsRepository.save(product);
     return productSaved;
 }
+/* const decreaseStock = async (productId, quantity) => {
+    const product = await productsRepository.getById(productId);
+    if (!product) throw new Error('Producto no encontrado');
+
+    if (product.stock < quantity) {
+        throw new Error(`Stock insuficiente para el producto ${product.title}`);
+    }
+    product.stock -= quantity;
+    await productsRepository.update(productId, product);
+}; */
+const decreaseStock = async (productId, quantity, session = null) => {
+    const product = await productsRepository.getById(productId, session);
+    if (!product) throw new Error('Producto no encontrado');
+
+    if (product.stock < quantity) {
+        throw new Error(`Stock insuficiente para el producto ${product.title}`);
+    }
+    product.stock -= quantity;
+    await productsRepository.update(productId, product, session);
+};
 const update = async(pid, productToReplace) => {
     const productUpdated = await productsRepository.update(pid, productToReplace);
     return productUpdated;
@@ -109,6 +133,7 @@ export {
     getIdsByTitle,
     save,
     updateRestoreProduct,
+    decreaseStock,
     update,
     updatePricesByCategories,
     restorePricesByCategories,

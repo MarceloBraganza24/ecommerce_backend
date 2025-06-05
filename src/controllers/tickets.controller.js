@@ -1,5 +1,7 @@
 import * as ticketsService from '../services/tickets.service.js';
 import * as cartsService from '../services/carts.service.js';
+import * as productsService from '../services/products.service.js';
+import mongoose from 'mongoose';
 
 const getAll = async (req, res) => {
     try {
@@ -10,18 +12,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const getAllByPage = async (req, res) => {
-    try {
-        const { page = 1, limit = 25, search = "" } = req.query;      
-        const query = search ? { title: { $regex: search, $options: "i" } } : {};
-
-        const tickets = await ticketsService.getAllByPage(query, { page, limit });
-        res.sendSuccess(tickets);
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}  */
 const getAllByPage = async (req, res) => {
     try {
         const { page = 1, limit = 25, search = "", field = "" } = req.query;
@@ -135,6 +125,127 @@ const saveSale = async (req, res) => {
         req.logger.error(error.message);
     }
 }
+/* const saveAdminSale = async (req, res) => {
+    try {
+        const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_role } = req.body;
+
+        // 🔍 Verificar stock antes de continuar
+        for (const item of items) {
+            const productId = item._id;
+            const quantityRequested = item.quantity;
+
+            const product = await productsService.getById(productId);
+            if (!product) {
+                return res.status(404).json({ status: "error", message: `Producto con ID ${productId} no encontrado.` });
+            }
+
+            if (product.stock < quantityRequested) {
+                return res.status(400).json({
+                    status: "error",
+                    message: `Stock insuficiente para "${product.title}". Stock disponible: ${product.stock}, solicitado: ${quantityRequested}`,
+                });
+            }
+        }
+
+        // Si todo ok, crear snapshot para el ticket
+        const itemsFiltered = items.map(item => ({
+            product: item._id,
+            quantity: item.quantity,
+            snapshot: {
+                title: item.title,
+                price: item.price,
+                image: item.images[0],
+            }
+        }));
+
+        const newTicket = {
+            amount,
+            payer_email,
+            items: itemsFiltered,
+            deliveryMethod,
+            user_role,
+            purchase_datetime
+        };
+
+        const ticket = await ticketsService.save(newTicket);
+
+        // 🔽 Descontar stock
+        for (const item of items) {
+            await productsService.decreaseStock(item._id, item.quantity);
+        }
+        res.sendSuccessNewResourse(ticket);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}; */
+
+const saveAdminSale = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { amount, payer_email, items, deliveryMethod, purchase_datetime, user_role } = req.body;
+
+        // Validar stock usando la sesión
+        for (const item of items) {
+            const product = await productsService.getById(item._id, session);
+            if (!product) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(404).json({ status: "error", message: `Producto con ID ${item._id} no encontrado.` });
+            }
+            if (product.stock < item.quantity) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({
+                    status: "error",
+                    message: `Stock insuficiente para "${product.title}". Stock disponible: ${product.stock}, solicitado: ${item.quantity}`,
+                });
+            }
+        }
+
+        // Crear snapshot para el ticket
+        const itemsFiltered = items.map(item => ({
+            product: item._id,
+            quantity: item.quantity,
+            snapshot: {
+                title: item.title,
+                price: item.price,
+                image: item.images[0],
+            }
+        }));
+
+        const newTicket = {
+            amount,
+            payer_email,
+            items: itemsFiltered,
+            deliveryMethod,
+            user_role,
+            purchase_datetime
+        };
+
+        // Guardar ticket con sesión
+        const ticket = await ticketsService.save(newTicket, session);
+
+        // Descontar stock con sesión
+        for (const item of items) {
+            await productsService.decreaseStock(item._id, item.quantity, session);
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.sendSuccessNewResourse(ticket);
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
+
+
 const hiddenVisibility = async (req, res) => {
     try {
         const { tid } = req.params;
@@ -241,6 +352,7 @@ export {
     getAll,
     getById,
     saveSale,
+    saveAdminSale,
     save,
     hiddenVisibility,
     eliminate,

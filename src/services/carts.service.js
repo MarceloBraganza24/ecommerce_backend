@@ -34,34 +34,6 @@ const eliminate = async(user_id) => {
     return cartEliminated;
 }
 
-/* let amount = 0;
-const outStock = [];
-
-const purchase = async (cid, purchaser) => {
-    const session = await mongoose.startSession();
-    try {
-        session.startTransaction();
-        const cart = await cartsRepository.getById(cid);
-        cart.products.forEach(async ({ product, quantity }) => {
-            if(product.stock >= quantity) {
-                amount += product.price * quantity;
-                product.stock -= quantity;
-                await productsRepository.update(product._id, product)
-            } else {
-                outStock.push({ product, quantity });
-            }
-            return outStock;
-        })
-        //const ticket = await ticketsService.save(purchaser, amount);
-        await cartsRepository.update(cid, outStock);
-        await session.commitTransaction();
-        //return ticket;
-    } catch (error) {
-        await session.abortTransaction();
-    } finally {
-        session.endSession();
-    }
-} */
 let amount = 0;
 
 const purchase = async (cid) => {

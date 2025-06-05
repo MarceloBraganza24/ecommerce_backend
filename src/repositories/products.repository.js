@@ -2,8 +2,14 @@ export default class ProductsRepository {
     constructor(dao) {
         this.dao = dao;
     }
-    getById = async(pid) => {
+    /* getById = async(pid) => {
         const product = await this.dao.getById(pid);
+        return product;
+    } */
+    getById = async(pid, session = null) => {
+        const query = await this.dao.getById(pid);
+        if (session) query.session(session);
+        const product = await query;
         return product;
     }
     updateSoftDelete = async(pid) => {
@@ -37,8 +43,15 @@ export default class ProductsRepository {
         const productSaved = await this.dao.save(product);
         return productSaved;
     }
-    update = async(pid, productToReplace) => {
+    /* update = async(pid, productToReplace) => {
         const productUpdated = await this.dao.update(pid, productToReplace);
+        return productUpdated;
+    } */
+    update = async(pid, productToReplace, session = null) => {
+        const query = await this.dao.update(pid, productToReplace);
+        //const query = productsModel.updateOne({ _id: pid }, productToReplace);
+        if (session) query.session(session);
+        const productUpdated = await query;
         return productUpdated;
     }
     updatePricesByCategories = async(categories, percentage) => {

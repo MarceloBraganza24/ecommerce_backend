@@ -4,10 +4,15 @@ export default class Products {
     constructor() {
         console.log('Working with products DB');
     }
-    getById = async (pid) => {
+    /* getById = async (pid) => {
         const product = await productsModel.findById({ _id: pid, deleted: false });
         return product; 
-    }
+    } */
+    getById = async (pid, session = null) => {
+        const query = productsModel.findOne({ _id: pid, deleted: false });
+        if (session) query.session(session);
+        return await query.exec(); // ✅ ejecuta la consulta y devuelve el documento
+    };
     getDeleted = async () => {
         const deletedProducts = await productsModel.find({ deleted: true }).lean();
         return deletedProducts;
@@ -60,9 +65,13 @@ export default class Products {
         const productSaved = await productsModel.create(product);
         return productSaved;
     }
-    update = async (pid, productToReplace) => {
+    /* update = async (pid, productToReplace) => {
         const productUpdated = await productsModel.updateOne({ _id: pid }, productToReplace);
         return productUpdated;
+    } */
+    update = async (pid, productToReplace, session = null) => {
+        const options = session ? { session } : {};
+        return await productsModel.updateOne({ _id: pid }, productToReplace, options);
     }
     updatePricesByCategories = async (categories, percentage) => {
         const factor = 1 + (percentage / 100);

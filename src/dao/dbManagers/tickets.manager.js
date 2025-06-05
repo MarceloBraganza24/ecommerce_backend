@@ -5,9 +5,14 @@ export default class TicketsDao {
         const tickets = await ticketsModel.find().lean();
         return tickets;
     }
-    getById = async(id) => {
+    /* getById = async(id) => {
         const ticket = await ticketsModel.findById(id).lean();
         return ticket;
+    } */
+    getById = async (id, session = null) => {
+        const query = ticketsModel.findById(id);
+        if (session) query.session(session);
+        return await query.lean();
     }
     getDeleted = async () => {
         const deletedTickets = await ticketsModel.find({ deleted: true }).lean();
@@ -47,9 +52,17 @@ export default class TicketsDao {
 
         return tickets; 
     }
-    save = async(ticket) => {
+    /* save = async(ticket) => {
         const ticketSaved = await ticketsModel.create(ticket);
         return ticketSaved;
+    } */
+    save = async (ticket, session = null) => {
+        if (session) {
+            // Para crear dentro de una transacción hay que pasar la session en create()
+            return await ticketsModel.create([ticket], { session });
+        } else {
+            return await ticketsModel.create(ticket);
+        }
     }
     update = async(id,ticket) => {
         const ticketUpdated = await ticketsModel.findByIdAndUpdate(id,ticket);
