@@ -6,12 +6,21 @@ export default class ProductsRepository {
         const product = await this.dao.getById(pid);
         return product;
     } */
-    getById = async(pid, session = null) => {
+    /* getById = async(pid, session = null) => {
         const query = await this.dao.getById(pid);
         if (session) query.session(session);
         const product = await query;
         return product;
-    }
+    } */
+    /* getById = async (pid, session = null) => {
+        let query = this.dao.getById(pid); // 🔄 sin await
+        if (session) query = query.session(session); // ✅ aplicar session a la query
+        const product = await query; // ahora sí ejecutás la query
+        return product;
+    }; */
+    getById = async (pid, session = null) => {
+        return await this.dao.getById(pid, session);
+    };
     updateSoftDelete = async(pid) => {
         const productsUpdated = await this.dao.updateSoftDelete(pid);
         return productsUpdated;
@@ -47,13 +56,22 @@ export default class ProductsRepository {
         const productUpdated = await this.dao.update(pid, productToReplace);
         return productUpdated;
     } */
-    update = async(pid, productToReplace, session = null) => {
+    /* update = async(pid, productToReplace, session = null) => {
         const query = await this.dao.update(pid, productToReplace);
         //const query = productsModel.updateOne({ _id: pid }, productToReplace);
         if (session) query.session(session);
         const productUpdated = await query;
         return productUpdated;
-    }
+    } */
+    /* update = async(pid, productToReplace, session = null) => {
+        let query = this.dao.update(pid, productToReplace);
+        if (session) query = query.session(session);
+        const productUpdated = await query;
+        return productUpdated;
+    }; */
+    update = async (pid, productToReplace, session = null) => {
+        return await this.dao.update(pid, productToReplace, session);
+    };
     updatePricesByCategories = async(categories, percentage) => {
         const productsUpdated = await this.dao.updatePricesByCategories(categories, percentage);
         return productsUpdated;

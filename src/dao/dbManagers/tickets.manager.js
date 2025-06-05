@@ -56,13 +56,19 @@ export default class TicketsDao {
         const ticketSaved = await ticketsModel.create(ticket);
         return ticketSaved;
     } */
-    save = async (ticket, session = null) => {
+    /* save = async (ticket, session = null) => {
         if (session) {
             // Para crear dentro de una transacción hay que pasar la session en create()
             return await ticketsModel.create([ticket], { session });
         } else {
             return await ticketsModel.create(ticket);
         }
+    } */
+    save = async (ticket, session = null) => {
+        const [created] = session
+            ? await ticketsModel.create([ticket], { session })
+            : await ticketsModel.create([ticket]);
+        return created;
     }
     update = async(id,ticket) => {
         const ticketUpdated = await ticketsModel.findByIdAndUpdate(id,ticket);

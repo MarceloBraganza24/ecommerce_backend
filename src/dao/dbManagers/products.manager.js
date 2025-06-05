@@ -9,10 +9,16 @@ export default class Products {
         return product; 
     } */
     getById = async (pid, session = null) => {
+        const query = session
+            ? productsModel.findOne({ _id: pid, deleted: false }).session(session)
+            : productsModel.findOne({ _id: pid, deleted: false });
+        return await query;
+    };
+    /* getById = async (pid, session = null) => {
         const query = productsModel.findOne({ _id: pid, deleted: false });
         if (session) query.session(session);
         return await query.exec(); // ✅ ejecuta la consulta y devuelve el documento
-    };
+    }; */
     getDeleted = async () => {
         const deletedProducts = await productsModel.find({ deleted: true }).lean();
         return deletedProducts;

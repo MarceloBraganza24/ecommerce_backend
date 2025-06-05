@@ -24,12 +24,8 @@ export default class TicketsRepository {
         const ticketSaved = await this.dao.save(ticket);
         return ticketSaved;
     } */
-   save = async (ticket, session = null) => {
-        if (session) {
-            return await this.dao.save(ticket, { session });
-        } else {
-            return await this.dao.save(ticket);
-        }
+    save = async (ticket, session = null) => {
+        return await this.dao.save(ticket, session);
     }
     update = async(id,ticket) => {
         const ticketUpdated = await this.dao.update(id,ticket);
