@@ -10,7 +10,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const getById = async (req, res) => {
     try {
         const { dFid } = req.params;            
@@ -21,7 +20,6 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const save = async (req, res) => {
     try {
         const { street,street_number,locality,province,country,postal_code,name,phone,owner} = req.body;
@@ -38,7 +36,6 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const update = async (req, res) => {
     try {
         const { dFid } = req.params;
@@ -52,7 +49,6 @@ const update = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const eliminate = async (req, res) => {
     try {
         const { dFid } = req.params;

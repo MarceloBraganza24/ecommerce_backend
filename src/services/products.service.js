@@ -5,10 +5,6 @@ import { ProductExists } from '../utils/custom.exceptions.js';
 const productsDao = new Products();
 const productsRepository = new ProductsRepository(productsDao);
 
-/* const getById = async(pid) => {
-    const product = await productsRepository.getById(pid);
-    return product;
-} */
 const getById = async (pid, session = null) => {
     const product = await productsRepository.getById(pid, session);
     return product;
@@ -33,16 +29,17 @@ const getAllByPage = async(query, { page, limit }) => {
     const products = await productsRepository.getAllByPage(query, { page, limit });
     return products;
 }
+const groupedByCategory = async(limit) => {
+    const products = await productsRepository.groupedByCategory(limit);
+    return products;
+}
 const getAllBy = async (filters, page, limit) => {
     const { minPrice, maxPrice, sort, ...rest } = filters;
-
     const query = {};
-
     // Agregamos filtros como category, title, etc.
     Object.keys(rest).forEach((key) => {
         query[key] = { $regex: rest[key], $options: "i" };
     });
-
     // Filtro por rango de precios
     if (minPrice && maxPrice) {
         query.price = {
@@ -50,7 +47,6 @@ const getAllBy = async (filters, page, limit) => {
             $lte: Number(maxPrice)
         };
     }
-
     // Ordenamiento
     const sortOption = sort === "asc" ? { price: 1 } :
                        sort === "desc" ? { price: -1 } :
@@ -74,16 +70,6 @@ const save = async(product) => {
     const productSaved = await productsRepository.save(product);
     return productSaved;
 }
-/* const decreaseStock = async (productId, quantity) => {
-    const product = await productsRepository.getById(productId);
-    if (!product) throw new Error('Producto no encontrado');
-
-    if (product.stock < quantity) {
-        throw new Error(`Stock insuficiente para el producto ${product.title}`);
-    }
-    product.stock -= quantity;
-    await productsRepository.update(productId, product);
-}; */
 const decreaseStock = async (productId, quantity, session = null) => {
     const product = await productsRepository.getById(productId, session);
     if (!product) throw new Error('Producto no encontrado');
@@ -129,6 +115,7 @@ export {
     updateSoftDelete,
     getDeleted,
     getAllByPage,
+    groupedByCategory,
     getAllBy,
     getIdsByTitle,
     save,

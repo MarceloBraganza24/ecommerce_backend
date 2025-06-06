@@ -64,7 +64,6 @@ const getAllByPageAndEmail = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const getById = async (req, res) => {
     try {
         const { tid } = req.params;            
@@ -75,7 +74,6 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const save = async (req, res) => {
     try {
         const { payment,items,shippingAddress,deliveryMethod } = req.body;
@@ -96,7 +94,6 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const saveSale = async (req, res) => {
     try {
         const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_cart_id,user_role } = req.body;
@@ -125,68 +122,11 @@ const saveSale = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const saveAdminSale = async (req, res) => {
-    try {
-        const { amount,payer_email,items,deliveryMethod,purchase_datetime,user_role } = req.body;
-
-        // 🔍 Verificar stock antes de continuar
-        for (const item of items) {
-            const productId = item._id;
-            const quantityRequested = item.quantity;
-
-            const product = await productsService.getById(productId);
-            if (!product) {
-                return res.status(404).json({ status: "error", message: `Producto con ID ${productId} no encontrado.` });
-            }
-
-            if (product.stock < quantityRequested) {
-                return res.status(400).json({
-                    status: "error",
-                    message: `Stock insuficiente para "${product.title}". Stock disponible: ${product.stock}, solicitado: ${quantityRequested}`,
-                });
-            }
-        }
-
-        // Si todo ok, crear snapshot para el ticket
-        const itemsFiltered = items.map(item => ({
-            product: item._id,
-            quantity: item.quantity,
-            snapshot: {
-                title: item.title,
-                price: item.price,
-                image: item.images[0],
-            }
-        }));
-
-        const newTicket = {
-            amount,
-            payer_email,
-            items: itemsFiltered,
-            deliveryMethod,
-            user_role,
-            purchase_datetime
-        };
-
-        const ticket = await ticketsService.save(newTicket);
-
-        // 🔽 Descontar stock
-        for (const item of items) {
-            await productsService.decreaseStock(item._id, item.quantity);
-        }
-        res.sendSuccessNewResourse(ticket);
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}; */
-
 const saveAdminSale = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
-
     try {
         const { amount, payer_email, items, deliveryMethod, purchase_datetime, user_role } = req.body;
-
         // Validar stock usando la sesión
         for (const item of items) {
             const product = await productsService.getById(item._id, session);
@@ -204,7 +144,6 @@ const saveAdminSale = async (req, res) => {
                 });
             }
         }
-
         // Crear snapshot para el ticket
         const itemsFiltered = items.map(item => ({
             product: item._id,
@@ -244,8 +183,6 @@ const saveAdminSale = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-
-
 const hiddenVisibility = async (req, res) => {
     try {
         const { tid } = req.params;
@@ -269,8 +206,6 @@ const eliminate = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
-        
 const massDelete = async (req, res) => {
   try {
     const { ids } = req.body;
@@ -316,7 +251,6 @@ const massRestore = async (req, res) => {
         res.sendServerError(error.message);
     }
 };
-
 const updateSoftDelete = async (req, res) => {
     try {
         const { tid } = req.params;
@@ -337,7 +271,6 @@ const updateRestoreProduct = async (req, res) => {
         req.logger.error(error.message);
     }
 } 
-
 const getDeleted = async (req, res) => {
     try {
         const deletedTickets = await ticketsService.getDeleted();

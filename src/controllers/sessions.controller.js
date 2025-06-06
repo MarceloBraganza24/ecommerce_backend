@@ -17,7 +17,6 @@ const singIn = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -40,7 +39,6 @@ const login = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const logout = async (req, res) => {
     try {
         const token = req.cookies.TokenJWT;
@@ -59,7 +57,6 @@ const logout = async (req, res) => {
         res.sendServerError('Error al cerrar sesión');
     }
 };
-
 const current = async(req,res) =>{
     try {
         const token = req.cookies.TokenJWT;

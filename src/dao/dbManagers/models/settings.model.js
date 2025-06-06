@@ -53,6 +53,14 @@ const settingsSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    socialNetworks: {
+        type: [{
+            name: { type: String, required: true },   // Nombre de la red (ej: "Facebook")
+            url: { type: String, required: true },    // Enlace (ej: "https://facebook.com/tu_pagina")
+            logo: { type: String, required: true }    // Ruta al logo (ej: "uploads/facebook.png")
+        }],
+        default: []
+    }
 }, {
     timestamps: true // Crea automáticamente createdAt y updatedAt
 });

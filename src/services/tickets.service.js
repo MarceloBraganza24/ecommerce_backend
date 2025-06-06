@@ -18,15 +18,6 @@ const getById = async (id) => {
     const ticket = await ticketsManager.getById(id);
     return ticket;
 }
-/* const save = async (ticket) => {
-    const code = Date.now() + Math.floor(Math.random() * 100000 + 1);
-    const newTicket = {
-        ...ticket,
-        code,
-    }
-    const ticketSaved = await ticketsManager.save(newTicket);
-    return ticketSaved;
-} */
 const save = async (ticket, session = null) => {
     const code = Date.now() + Math.floor(Math.random() * 100000 + 1);
     const newTicket = { ...ticket, code };
@@ -37,7 +28,6 @@ const save = async (ticket, session = null) => {
         return await ticketsManager.save(newTicket);
     }
 };
-
 const update = async(id,ticket) => {
     ticket.visibility.user = false;
     const ticketUpdated = await ticketsManager.update(id,ticket);

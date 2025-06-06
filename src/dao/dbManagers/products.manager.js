@@ -4,24 +4,30 @@ export default class Products {
     constructor() {
         console.log('Working with products DB');
     }
-    /* getById = async (pid) => {
-        const product = await productsModel.findById({ _id: pid, deleted: false });
-        return product; 
-    } */
     getById = async (pid, session = null) => {
         const query = session
             ? productsModel.findOne({ _id: pid, deleted: false }).session(session)
             : productsModel.findOne({ _id: pid, deleted: false });
         return await query;
     };
-    /* getById = async (pid, session = null) => {
-        const query = productsModel.findOne({ _id: pid, deleted: false });
-        if (session) query.session(session);
-        return await query.exec(); // ✅ ejecuta la consulta y devuelve el documento
-    }; */
     getDeleted = async () => {
         const deletedProducts = await productsModel.find({ deleted: true }).lean();
         return deletedProducts;
+    };
+    groupedByCategory = async (limit) => {
+        // Obtener las categorías distintas primero
+        const categories = await productsModel.distinct('category', { deleted: false });
+        const result = {};
+        for (const category of categories) {
+            // Traer hasta 'limit' productos por categoría, ordenados por ejemplo por número de ventas descendente
+            const products = await productsModel.find({ category, deleted: false })
+            .sort({ number_sales: -1 }) // Cambiá el criterio de orden si querés
+            .limit(limit)
+            .lean();
+
+            result[category] = products;
+        }
+        return result;
     };
     getAll = async () => {
         const products = await productsModel.find({ deleted: false }).lean();
@@ -71,10 +77,6 @@ export default class Products {
         const productSaved = await productsModel.create(product);
         return productSaved;
     }
-    /* update = async (pid, productToReplace) => {
-        const productUpdated = await productsModel.updateOne({ _id: pid }, productToReplace);
-        return productUpdated;
-    } */
     update = async (pid, productToReplace, session = null) => {
         const options = session ? { session } : {};
         return await productsModel.updateOne({ _id: pid }, productToReplace, options);
@@ -99,7 +101,6 @@ export default class Products {
                 }
             ]
         );
-
         return result;
     };
     restorePricesByCategories = async (categories) => {
@@ -151,5 +152,4 @@ export default class Products {
         );
         return restored;
     }
-
 }

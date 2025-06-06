@@ -9,9 +9,7 @@ export default class UsersRouter extends Router {
         this.delete('/delete-one/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, eliminateOne);
         this.put('/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, update);
         this.put('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updateProp);
-
         this.put('/address-selected/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updateSelectedAddress);
-
         this.patch('/props/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updateProps);
         this.post('/password-link', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, mailToResetPass);
         this.post('/reset-pass', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, resetPass);

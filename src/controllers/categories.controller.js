@@ -10,7 +10,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const getById = async (req, res) => {
     try {
         const { tid } = req.params;            
@@ -21,7 +20,6 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const save = async (req, res) => {
     try {
         const { name, category_datetime  } = req.body;
@@ -35,7 +33,6 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const eliminate = async (req, res) => {
     try {
         const { cid } = req.params;

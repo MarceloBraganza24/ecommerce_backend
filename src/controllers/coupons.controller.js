@@ -10,7 +10,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const getById = async (req, res) => {
     try {
         const { cid } = req.params;            
@@ -21,23 +20,6 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const getByCode = async (req, res) => {
-    try {
-        const { codeCoupon  } = req.body;    
-        if (!codeCoupon) {
-            return res.status(400).json({ mensaje: "Código de cupón requerido." });
-        }
-        const coupon = await couponsService.getByCode(codeCoupon);
-        if (!coupon) {
-            return res.status(400).json({ mensaje: "Código de cupón no existe." });
-        } else {
-            res.sendSuccess(coupon);
-        }
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-} */
 const getByCode = async (req, res) => {
     try {
         const { codeCoupon } = req.body;
@@ -67,8 +49,6 @@ const getByCode = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-
-
 const save = async (req, res) => {
     try {
         const { code,discount,expiration_date } = req.body;
@@ -88,14 +68,9 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const eliminate = async (req, res) => {
     try {
         const { cid } = req.params;
-        const coupon = await couponsService.getById(cid);
-        /* if (!coupons) {
-            return res.status(404).json({ message: 'Domicilio no encontrado' });
-        } */
         const deletedCoupon = await couponsService.eliminate(cid);
         res.sendSuccessNewResourse(deletedCoupon);
 

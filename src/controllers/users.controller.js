@@ -13,7 +13,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }   
 }
-
 const finalizePurchase = async (req, res) => {
     try {
         const uid = req.user._id;
@@ -24,7 +23,6 @@ const finalizePurchase = async (req, res) => {
         req.logger.error(error.message);
     }   
 }
-
 const mailToResetPass = async (req, res) => {
     try {
         const {email} = req.body;
@@ -36,7 +34,6 @@ const mailToResetPass = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const resetPass = async (req, res) => {
     try {
         const cookie = req.query.cookie;
@@ -57,7 +54,6 @@ const resetPass = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const changeRole = async (req, res) => {
     try {
         const { uid } = req.params;
@@ -78,7 +74,6 @@ const changeRole = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const uploadFiles = async (req, res) => {
     try {
         const { uid } = req.params;
@@ -127,7 +122,6 @@ const uploadFiles = async (req, res) => {
     }
     
 }
-
 const update = async (req, res) => {
     try {
         const uid = req.params.uid;
@@ -143,7 +137,6 @@ const update = async (req, res) => {
         }
     }
 }
-
 const updateProp = async (req, res) => {
     try {
         const {email,prop,prop_value} = req.body;
@@ -158,7 +151,6 @@ const updateProp = async (req, res) => {
         }
     }
 }
-
 const updateProps = async (req, res) => {
     try {
         const {first_name,last_name} = req.body;
@@ -174,7 +166,6 @@ const updateProps = async (req, res) => {
         }
     }
 }
-
 const updateSelectedAddress = async (req, res) => {
     try {
         const { uid } = req.params;
@@ -199,18 +190,6 @@ const updateSelectedAddress = async (req, res) => {
         res.status(500).json({ message: "Error al actualizar el domicilio.", error: error.message });
     }
 };
-
-
-/* const eliminate = async (req, res) => {
-    try {
-        const currentUsers = await usersService.eliminate();
-        res.sendSuccess({message: 'Los usuarios han sido eliminados correctamente', data: currentUsers});
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-} */
-
 const eliminateOne = async (req, res) => {
     try {
         const { uid } = req.params;
@@ -221,7 +200,6 @@ const eliminateOne = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const eliminateCartUser = async (req, res) => {
     try {
         const { uid } = req.body;

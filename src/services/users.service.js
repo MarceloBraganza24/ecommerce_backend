@@ -14,12 +14,10 @@ const getAll = async() => {
     const usersDto = await usersRepository.getAll();
     return usersDto;
 }
-
 const getById = async(uid) => {
     const userById = await usersRepository.getById(uid);
     return userById;
 }
-
 const getByEmail = async(email) => {
     const userByEmail = await usersRepository.getByEmail(email);
     if(!userByEmail) {
@@ -27,12 +25,10 @@ const getByEmail = async(email) => {
     }
     return userByEmail; 
 }
-
 const getCurrent = async(user) => {
     const current = await usersRepository.getCurrent(user);
     return current;
 }
-
 const sendMailToResetPass = async(user) => {
     const userToken = {
         email: user.email
@@ -58,7 +54,6 @@ const sendMailToResetPass = async(user) => {
     await sendEmail(emailToResetPass);
     return accessToken;
 }
-
 const register = async(user) => {
     const userByEmail = await usersRepository.getByEmail(user.email);
     if(userByEmail) {
@@ -78,7 +73,6 @@ const register = async(user) => {
     const result = await usersRepository.save(newUser);
     return result;
 }
-
 const login = async(password, email,last_connection) => {
     const user = await usersRepository.getByEmail(email);
     if(!user) {
@@ -101,7 +95,6 @@ const login = async(password, email,last_connection) => {
         return accessToken;
     }
 }
-
 const changePass = async(pass, user) => {
     const hashedPassword = createHash(pass);
     const comparePassword = isValidPassword(pass, user.password);
@@ -113,7 +106,6 @@ const changePass = async(pass, user) => {
     await usersRepository.update(user._id, userToUpdate);
     return userToUpdate;
 }
-
 const update = async(id, user) => {
     const users = await usersRepository.getAll();
     const userById = await usersRepository.getById(id);
@@ -129,14 +121,12 @@ const update = async(id, user) => {
         return userUpdated;
     }
 }
-
 const updateProp = async(email,prop,prop_value) => {
     const userByEmail = await usersRepository.getByEmail(email)
     userByEmail[prop] = prop_value;
     const userUpdated = await usersRepository.update(userByEmail._id, userByEmail);
     return userUpdated;
 }
-
 const updateProps = async(uid,first_name,last_name) => {
     const userById = await usersRepository.getById(uid);
     const propsUserUpdated = {
@@ -147,7 +137,6 @@ const updateProps = async(uid,first_name,last_name) => {
     const userUpdated = await usersRepository.update(uid, propsUserUpdated);
     return userUpdated;
 }
-
 const updateSelectedAddress = async(user_id,selected_addresses) => {
     const userById = await usersRepository.getById(user_id);
     
@@ -158,7 +147,6 @@ const updateSelectedAddress = async(user_id,selected_addresses) => {
     const userUpdated = await usersRepository.update(user_id, propsUserUpdated);
     return userUpdated;
 }
-
 const logOut = async(user,last_connection) => {
     const newUser = {
         ...user,
@@ -170,7 +158,6 @@ const logOut = async(user,last_connection) => {
         return userUpdated;
     }
 }
-
 const eliminateOne = async(id) => {
     const userDeleted = await usersRepository.eliminate(id);
     return userDeleted;

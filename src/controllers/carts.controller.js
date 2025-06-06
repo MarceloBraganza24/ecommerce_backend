@@ -10,7 +10,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const getById = async (req, res) => {
     try {
         const { cid } = req.params;
@@ -31,7 +30,6 @@ const getByUserId = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const save = async (req, res) => {
     try {
         const { user_id, products } = req.body;
@@ -69,11 +67,6 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-    
-    
-    
-    
-
 const update = async (req, res) => {
     try {
         const { cid } = req.params;
@@ -88,7 +81,6 @@ const update = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const updateProductQuantity = async (req, res) => {
     try {
         const { uid } = req.params;
@@ -112,7 +104,6 @@ const updateProductQuantity = async (req, res) => {
         res.status(500).json({ message: "Error en el servidor" });
     }
 };
-
 const removeProductFromCart = async (req, res) => {
     try {
         const { user_id, product_id } = req.params;
@@ -121,7 +112,6 @@ const removeProductFromCart = async (req, res) => {
         if (!cart) {
             return res.status(404).json({ message: "Carrito no encontrado" });
         }
-        
         // Filtrar productos, dejando solo los que NO sean el que queremos eliminar
         cart.products = cart.products.filter(p => p.product._id.toString() !== product_id);
 
@@ -140,8 +130,6 @@ const removeProductFromCart = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-
-
 const eliminate = async (req, res) => {
     try {
         const { user_id } = req.params;
@@ -152,7 +140,6 @@ const eliminate = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const finalizePurchase = async (req, res) => {
     try {
         const { cid } = req.params;

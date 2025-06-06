@@ -10,7 +10,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const getById = async (req, res) => {
     try {
         const { sAId } = req.params;            
@@ -21,7 +20,6 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const save = async (req, res) => {
     try {
         const { street,street_number,locality,province,postal_code, sellerAddress_datetime  } = req.body;
@@ -43,7 +41,6 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const eliminate = async (req, res) => {
     try {
         const { sAId } = req.params;

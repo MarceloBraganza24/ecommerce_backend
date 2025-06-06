@@ -35,6 +35,16 @@ const getAllBy = async (req, res) => {
         req.logger.error(error.message);
     }
 };
+const groupedByCategory = async (req, res) => {
+    try {
+        const limit = 10;
+        const groupedProducts = await productsService.groupedByCategory(limit);
+        res.sendSuccess(groupedProducts);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
 const getAllByPage = async (req, res) => {
     try {
         const { page = 1, limit = 25, search = "", field = "" } = req.query;
@@ -58,7 +68,6 @@ const getAllByPage = async (req, res) => {
                 query[field] = { $regex: search, $options: "i" };
             }
         }
-
         const products = await productsService.getAllByPage(query, { page, limit });
         res.sendSuccess(products);
     } catch (error) {
@@ -66,10 +75,6 @@ const getAllByPage = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-
-
-
-
 const getById = async (req, res) => {
     try {
         const { pid } = req.params;            
@@ -129,7 +134,6 @@ const save = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-
 const update = async (req, res) => {
     try {
         const { pid } = req.params;
@@ -161,7 +165,6 @@ const update = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-
 const updatePricesByCategories = async (req, res) => {
     try {
         const { categories, percentage } = req.body;
@@ -257,7 +260,6 @@ const massRestore = async (req, res) => {
     }
 };
 
-
 export {
     getAll,
     getDeleted,
@@ -273,5 +275,6 @@ export {
     eliminate,
     massRestore,
     massDelete,
+    groupedByCategory,
     massDeletePermanent
 }

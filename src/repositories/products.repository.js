@@ -2,22 +2,6 @@ export default class ProductsRepository {
     constructor(dao) {
         this.dao = dao;
     }
-    /* getById = async(pid) => {
-        const product = await this.dao.getById(pid);
-        return product;
-    } */
-    /* getById = async(pid, session = null) => {
-        const query = await this.dao.getById(pid);
-        if (session) query.session(session);
-        const product = await query;
-        return product;
-    } */
-    /* getById = async (pid, session = null) => {
-        let query = this.dao.getById(pid); // 🔄 sin await
-        if (session) query = query.session(session); // ✅ aplicar session a la query
-        const product = await query; // ahora sí ejecutás la query
-        return product;
-    }; */
     getById = async (pid, session = null) => {
         return await this.dao.getById(pid, session);
     };
@@ -41,6 +25,10 @@ export default class ProductsRepository {
         const products = await this.dao.getAllByPage(query, { page, limit });
         return products;
     }
+    groupedByCategory = async(limit) => {
+        const products = await this.dao.groupedByCategory(limit);
+        return products;
+    }
     getAllBy = async (query, { page, limit, sort }) => {
         return await this.dao.getAllBy(query, { page, limit, sort });
     };
@@ -52,23 +40,6 @@ export default class ProductsRepository {
         const productSaved = await this.dao.save(product);
         return productSaved;
     }
-    /* update = async(pid, productToReplace) => {
-        const productUpdated = await this.dao.update(pid, productToReplace);
-        return productUpdated;
-    } */
-    /* update = async(pid, productToReplace, session = null) => {
-        const query = await this.dao.update(pid, productToReplace);
-        //const query = productsModel.updateOne({ _id: pid }, productToReplace);
-        if (session) query.session(session);
-        const productUpdated = await query;
-        return productUpdated;
-    } */
-    /* update = async(pid, productToReplace, session = null) => {
-        let query = this.dao.update(pid, productToReplace);
-        if (session) query = query.session(session);
-        const productUpdated = await query;
-        return productUpdated;
-    }; */
     update = async (pid, productToReplace, session = null) => {
         return await this.dao.update(pid, productToReplace, session);
     };
