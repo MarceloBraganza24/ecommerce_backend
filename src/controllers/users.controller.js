@@ -13,6 +13,42 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }   
 }
+const getAdmins = async (req, res) => {
+    try {
+        const users = await usersService.getAdmins();
+        res.sendSuccess(users);
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }   
+}
+const updateUser = async (req, res) => {
+    try {
+        const { uid } = req.params;
+        const { first_name, last_name, email, role } = req.body;
+
+        // Validación de campos obligatorios (los que permitís actualizar)
+        if (!first_name || !last_name || !email || !role) {
+            return res.sendClientError('Faltan campos requeridos');
+        }
+
+        const updatedUser = await usersService.update(uid, {
+            first_name,
+            last_name,
+            email,
+            role,
+        });
+
+        if (!updatedUser) {
+            return res.sendClientError('Usuario no encontrado');
+        }
+
+        res.sendSuccess(updatedUser);
+    } catch (error) {
+        req.logger.error(error.message);
+        res.sendServerError('Error al actualizar usuario');
+    }
+};
 const finalizePurchase = async (req, res) => {
     try {
         const uid = req.user._id;
@@ -215,6 +251,8 @@ const eliminateCartUser = async (req, res) => {
 
 export {
     getAll,
+    getAdmins,
+    updateUser,
     finalizePurchase,
     mailToResetPass,
     resetPass,

@@ -28,7 +28,18 @@ const settingsSchema = new mongoose.Schema({
         default: '#f39c12'
     },
     phoneNumbers: {
-        type: [String], // Arreglo de teléfonos como strings
+        type: [
+            {
+                number: {
+                    type: String,
+                    required: true
+                },
+                selected: {
+                    type: Boolean,
+                    default: false
+                }
+            }
+        ],
         default: []
     },
     sliderLogos: {

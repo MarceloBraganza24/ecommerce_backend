@@ -14,6 +14,10 @@ const getAll = async() => {
     const usersDto = await usersRepository.getAll();
     return usersDto;
 }
+const getAdmins = async() => {
+    const usersDto = await usersRepository.getAdmins();
+    return usersDto;
+}
 const getById = async(uid) => {
     const userById = await usersRepository.getById(uid);
     return userById;
@@ -196,6 +200,7 @@ const purchase = async(uid) => {
 
 export {
     getAll,
+    getAdmins,
     getById,
     getCurrent,
     getByEmail,

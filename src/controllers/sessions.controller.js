@@ -3,10 +3,24 @@ import { UserByEmailExists, InvalidCredentials,ExpiredToken } from "../utils/cus
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 
-const singIn = async (req, res) => {
+const signIn = async (req, res) => {
     try {
         const { first_name ,last_name, email, password,user_datetime } = req.body;
         if(!first_name || !last_name || !email || !password || !user_datetime) return res.sendClientError('incomplete values');
+        const registeredUser = await usersService.register({ ...req.body });
+        res.sendSuccessNewResourse(registeredUser);
+    } catch (error) {
+        if(error instanceof UserByEmailExists) {
+            return res.sendClientError(error.message);
+        }
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
+const signInAdmin = async (req, res) => {
+    try {
+        const { first_name ,last_name, email, password,role,user_datetime } = req.body;
+        if(!first_name || !last_name || !email || !password || !role || !user_datetime) return res.sendClientError('incomplete values');
         const registeredUser = await usersService.register({ ...req.body });
         res.sendSuccessNewResourse(registeredUser);
     } catch (error) {
@@ -71,7 +85,8 @@ const current = async(req,res) =>{
 }
 
 export {
-    singIn,
+    signIn,
+    signInAdmin,
     login,
     logout,
     current

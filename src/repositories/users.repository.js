@@ -9,6 +9,11 @@ export default class UsersRepository {
         const usersDto = users.map((user) => user = new UsersDto(user))
         return usersDto;
     }
+    getAdmins = async() => {
+        const users = await this.dao.getAdmins();
+        const usersDto = users.map((user) => user = new UsersDto(user))
+        return usersDto;
+    }
     getById = async(uid) => {
         const userById = await this.dao.getById(uid);
         return userById;
