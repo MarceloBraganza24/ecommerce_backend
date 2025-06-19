@@ -50,7 +50,7 @@ const getAllByPageAndEmail = async (req, res) => {
         const query = {};
 
         if (search) {
-            query.title = { $regex: search, $options: "i" };
+            query['items.snapshot.title'] = { $regex: search, $options: 'i' };
         }
 
         if (email) {
