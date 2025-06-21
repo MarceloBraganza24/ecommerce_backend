@@ -151,7 +151,7 @@ const updateSelectedAddress = async(user_id,selected_addresses) => {
     const userUpdated = await usersRepository.update(user_id, propsUserUpdated);
     return userUpdated;
 }
-const logOut = async(user,last_connection) => {
+/* const logOut = async(user,last_connection) => {
     const newUser = {
         ...user,
         last_connection: last_connection
@@ -161,7 +161,18 @@ const logOut = async(user,last_connection) => {
         const userUpdated = await usersRepository.update(user._id, newUser);
         return userUpdated;
     }
-}
+} */
+const logOut = async (userFromToken, last_connection) => {
+    const userFromDB = await usersRepository.getById(userFromToken._id);
+
+    if (!userFromDB) return null;
+
+    userFromDB.last_connection = last_connection;
+    userFromDB.isLoggedIn = false;
+
+    const userUpdated = await usersRepository.update(userFromDB._id, userFromDB);
+    return userUpdated;
+};
 const eliminateOne = async(id) => {
     const userDeleted = await usersRepository.eliminate(id);
     return userDeleted;
