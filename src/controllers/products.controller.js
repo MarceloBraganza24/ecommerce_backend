@@ -114,10 +114,15 @@ const save = async (req, res) => {
         if (req.body.propiedades) {
             propiedades = JSON.parse(req.body.propiedades);
         }
-        if (!title || !description || !price || !stock || !state || !category || !images || images.length === 0) {
+        let variantes = [];
+        if (req.body.variantes) {
+            variantes = JSON.parse(req.body.variantes);
+        }
+        if (!title || !description || !price || !state || !category || !images || images.length === 0) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
         const imagePaths = images.map(file => file.path);
+
         const registeredProduct = await productsService.save({
             images: imagePaths,
             title,
@@ -126,7 +131,8 @@ const save = async (req, res) => {
             stock,
             state,
             category,
-            camposExtras: propiedades
+            camposExtras: propiedades,
+            variantes
         });
         res.sendSuccessNewResourse(registeredProduct);
     } catch (error) {
@@ -143,6 +149,11 @@ const update = async (req, res) => {
         const imagenesAnterioresConPrefijo = imagenesAnterioresParsed.map(img => img.startsWith('uploads/') ? img : `uploads/${img}`);
         const nuevasImagenes = req.files.map(file => `uploads/${file.filename}`);
         const imagenesFinales = [...imagenesAnterioresConPrefijo, ...nuevasImagenes];
+        let variantes = [];
+        if (req.body.variantes) {
+            variantes = JSON.parse(req.body.variantes);
+        }
+
         const updatedProduct = await productsService.update(pid, {
             title,
             description,
@@ -151,7 +162,8 @@ const update = async (req, res) => {
             state,
             category,
             camposExtras: propiedadesParsed,
-            images: imagenesFinales
+            images: imagenesFinales,
+            ...(variantes.length > 0 && { variantes }) // Solo si hay variantes
         });
         if (!updatedProduct) {
             return res.status(404).json({ message: 'Producto no encontrado' });

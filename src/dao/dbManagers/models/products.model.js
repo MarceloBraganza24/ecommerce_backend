@@ -25,9 +25,13 @@ const productsSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
-    stock: {
+    /* stock: {
         type: Number,
         required: true
+    }, */
+    stock: {
+        type: Number,
+        required: function() { return !this.variantes || this.variantes.length === 0; }
     },
     state: {
         type: String,
@@ -44,6 +48,22 @@ const productsSchema = new mongoose.Schema({
     camposExtras: {
         type: Map,       // Almacena clave-valor dinámicamente
         of: String
+    },
+    variantes: {
+        type: [
+            {
+                campos: {
+                    type: Map,
+                    of: String,
+                    required: true
+                },
+                stock: {
+                    type: Number,
+                    required: true
+                }
+            }
+        ],
+        default: []
     },
     deleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null }
