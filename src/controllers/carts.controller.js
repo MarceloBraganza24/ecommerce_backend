@@ -1,5 +1,6 @@
 import * as cartsService from '../services/carts.service.js';
 import mongoose from "mongoose"; 
+import _ from 'lodash';
 
 const getAll = async (req, res) => {
     try {
@@ -41,19 +42,22 @@ const save = async (req, res) => {
             return res.sendSuccessNewResourse(cartSaved);
         }
 
-         // ✅ Convertimos `product` a ObjectId antes de comparar
-         products.forEach(({ product, quantity }) => {
-            const productId = new mongoose.Types.ObjectId(product); // 👈 Convertimos a ObjectId
+        products.forEach(({ product, quantity, selectedVariant }) => {
+            const productId = new mongoose.Types.ObjectId(product);
 
-            // 🔹 Buscamos el producto en el carrito asegurándonos de que los tipos coincidan
-            const existingProductIndex = cart.products.findIndex(p => p.product._id.toString() === productId.toString());
+            /* const existingProductIndex = cart.products.findIndex(p => 
+                p.product._id.toString() === productId.toString() &&
+                JSON.stringify(p.selectedVariant) === JSON.stringify(selectedVariant)
+            ); */
+            const existingProductIndex = cart.products.findIndex(p => 
+                p.product._id.toString() === productId.toString() &&
+                _.isEqual(p.selectedVariant, selectedVariant)
+            );
 
             if (existingProductIndex !== -1) {
-                // ✅ Si el producto ya está en el carrito, aumentamos la cantidad
                 cart.products[existingProductIndex].quantity += quantity;
             } else {
-                // ✅ Agregamos el producto si no existe en el carrito
-                cart.products.push({ product: productId, quantity });
+                cart.products.push({ product: productId, quantity, selectedVariant });
             }
         });
 
