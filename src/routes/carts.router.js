@@ -11,7 +11,7 @@ export default class CartsRouter extends Router {
         this.put('/:cid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, update);
         this.put('/update-quantity/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updateProductQuantity);
         this.delete('/:user_id', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, eliminate);
-        this.delete("/remove-product/:user_id/:product_id", [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, removeProductFromCart);
+        this.post("/remove-product/:user_id/:product_id", [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, removeProductFromCart);
         this.post('/:cid/purchase', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, finalizePurchase);
     }
 }

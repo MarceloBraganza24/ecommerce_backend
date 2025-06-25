@@ -85,7 +85,7 @@ const update = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-const updateProductQuantity = async (req, res) => {
+/* const updateProductQuantity = async (req, res) => {
     try {
         const { uid } = req.params;
         const { product, quantity } = req.body;
@@ -107,8 +107,38 @@ const updateProductQuantity = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Error en el servidor" });
     }
+}; */
+const updateProductQuantity = async (req, res) => {
+    try {
+        const { uid } = req.params;
+        const { product, quantity, selectedVariant } = req.body;
+
+        let cart = await cartsService.getByUserId(uid);
+        if (!cart) {
+            return res.status(404).json({ message: "Carrito no encontrado" });
+        }
+
+        const item = cart.products.find(p => 
+            p.product._id.toString() === product &&
+            JSON.stringify(p.selectedVariant) === JSON.stringify(selectedVariant)
+        );
+
+        if (!item) {
+            return res.status(404).json({ message: "Producto no encontrado en el carrito con esa variante" });
+        }
+
+        item.quantity = quantity;
+
+        await cartsService.update(cart._id, { products: cart.products });
+
+        res.json({ message: "Cantidad actualizada", cart });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
 };
-const removeProductFromCart = async (req, res) => {
+
+/* const removeProductFromCart = async (req, res) => {
     try {
         const { user_id, product_id } = req.params;
         // Buscar el carrito del usuario
@@ -133,7 +163,113 @@ const removeProductFromCart = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
+}; */
+/* const removeProductFromCart = async (req, res) => {
+    try {
+        const { user_id, product_id } = req.params;
+        const { selectedVariant } = req.body;
+
+        let cart = await cartsService.getByUserId(user_id);
+        if (!cart) {
+            return res.status(404).json({ message: "Carrito no encontrado" });
+        }
+
+        cart.products = cart.products.filter(p =>
+            !(
+                p.product._id.toString() === product_id &&
+                JSON.stringify(p.selectedVariant) === JSON.stringify(selectedVariant)
+            )
+        );
+
+        if (cart.products.length === 0) {
+            await cartsService.eliminate(cart.user_id);
+            return res.json({ message: "Carrito eliminado porque no tenía más productos" });
+        }
+
+        await cartsService.update(cart._id, { products: cart.products });
+        return res.json({ message: "Producto eliminado del carrito", cart });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}; */
+const removeProductFromCart = async (req, res) => {
+    try {
+        const { user_id, product_id } = req.params;
+        const { selectedVariant } = req.body;
+
+        console.log("=== Eliminando producto del carrito ===");
+        console.log("Producto ID recibido:", product_id);
+        console.log("Variante recibida:", selectedVariant);
+
+        const normalizeVariantCampos = (campos = {}) => {
+            const result = {};
+            for (const [key, val] of Object.entries(campos)) {
+                result[String(key).toLowerCase()] = String(val).toLowerCase().trim();
+            }
+            return result;
+        };
+
+        const variantsAreEqual = (v1, v2) => {
+            if (!v1 || !v2) return false;
+
+            const campos1 = normalizeVariantCampos(v1.campos);
+            const campos2 = normalizeVariantCampos(v2.campos);
+
+            const keys1 = Object.keys(campos1);
+            const keys2 = Object.keys(campos2);
+
+            if (keys1.length !== keys2.length) return false;
+
+            return keys1.every(key => campos1[key] === campos2[key]);
+        };
+
+        let cart = await cartsService.getByUserId(user_id);
+        if (!cart) {
+            return res.status(404).json({ message: "Carrito no encontrado" });
+        }
+
+        const originalLength = cart.products.length;
+
+        cart.products = cart.products.filter(p => {
+            const matches =
+                p.product._id.toString() === product_id &&
+                variantsAreEqual(p.selectedVariant, selectedVariant);
+
+            if (!matches) {
+                console.log("⛔ No coincide con:", {
+                    product: p.product,
+                    selectedVariant: p.selectedVariant,
+                });
+
+                console.log("🧪 Comparando:");
+                console.log("Product ID en carrito:", p.product._id.toString());
+                console.log("Product ID recibido:", product_id);
+                console.log("Campos carrito:", normalizeVariantCampos(p.selectedVariant.campos));
+                console.log("Campos recibidos:", normalizeVariantCampos(selectedVariant.campos));
+            }
+
+            return !matches;
+        });
+
+        if (cart.products.length === originalLength) {
+            return res.status(404).json({ message: "Producto no encontrado en el carrito" });
+        }
+
+        if (cart.products.length === 0) {
+            await cartsService.eliminate(cart.user_id);
+            return res.json({ message: "Carrito eliminado porque no tenía más productos" });
+        }
+
+        await cartsService.update(cart._id, { products: cart.products });
+        return res.json({ message: "Producto eliminado del carrito", cart });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
 };
+
+
 const eliminate = async (req, res) => {
     try {
         const { user_id } = req.params;
