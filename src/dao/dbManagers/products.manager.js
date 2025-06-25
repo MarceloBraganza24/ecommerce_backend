@@ -10,6 +10,12 @@ export default class Products {
             : productsModel.findOne({ _id: pid, deleted: false });
         return await query;
     };
+    getByIdIncludeDeleted = async (pid, session = null) => {
+        const query = session
+            ? productsModel.findOne({ _id: pid }).session(session)  // Sin filtro deleted
+            : productsModel.findOne({ _id: pid });
+        return await query;
+    };
     getDeleted = async () => {
         const deletedProducts = await productsModel.find({ deleted: true }).lean();
         return deletedProducts;
@@ -81,7 +87,7 @@ export default class Products {
         const options = session ? { session } : {};
         return await productsModel.updateOne({ _id: pid }, productToReplace, options);
     }
-    updatePricesByCategories = async (categories, percentage) => {
+    /* updatePricesByCategories = async (categories, percentage) => {
         const factor = 1 + (percentage / 100);
 
         const result = await productsModel.updateMany(
@@ -102,8 +108,56 @@ export default class Products {
             ]
         );
         return result;
+    }; */
+    updatePricesByCategories = async (categories, percentage) => {
+        const factor = 1 + (percentage / 100);
+
+        const result = await productsModel.updateMany(
+            { category: { $in: categories } },
+            [
+                {
+                    $set: {
+                        // Para productos SIN variantes
+                        originalPrice: {
+                            $cond: [
+                                { $ifNull: ["$originalPrice", false] },
+                                "$originalPrice",
+                                "$price"
+                            ]
+                        },
+                        price: { $round: [{ $multiply: ["$price", factor] }, 0] },
+
+                        // Para productos CON variantes
+                        variantes: {
+                            $map: {
+                                input: "$variantes",
+                                as: "v",
+                                in: {
+                                    $mergeObjects: [
+                                        "$$v",
+                                        {
+                                            originalPrice: {
+                                                $cond: [
+                                                    { $ifNull: ["$$v.originalPrice", false] },
+                                                    "$$v.originalPrice",
+                                                    "$$v.price"
+                                                ]
+                                            },
+                                            price: { $round: [{ $multiply: ["$$v.price", factor] }, 0] }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        );
+
+        return result;
     };
-    restorePricesByCategories = async (categories) => {
+
+    /* restorePricesByCategories = async (categories) => {
         const result = await productsModel.updateMany(
             {
                 category: { $in: categories },
@@ -122,9 +176,98 @@ export default class Products {
         );
         console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
         return result;
+    }; */
+    restorePricesByCategories = async (categories) => {
+        const result = await productsModel.updateMany(
+            {
+            category: { $in: categories },
+            $or: [
+                // Producto sin variantes con price distinto a originalPrice
+                {
+                $and: [
+                    { variantes: { $eq: [] } }, 
+                    { $expr: { $ne: ["$price", "$originalPrice"] } }
+                ]
+                },
+                // Producto con variantes donde al menos una variante tiene price distinto a originalPrice
+                {
+                variantes: { 
+                    $elemMatch: { 
+                    originalPrice: { $exists: true, $ne: null },
+                    $expr: { $ne: ["$price", "$originalPrice"] }
+                    }
+                }
+                }
+            ]
+            },
+            [
+            {
+                $set: {
+                // Para productos sin variantes
+                price: {
+                    $cond: [
+                    { $eq: ["$variantes", []] },
+                    { $round: ["$originalPrice", 0] },
+                    "$price"
+                    ]
+                },
+                // Para productos con variantes: actualiza el price de cada variante solo si es necesario
+                variantes: {
+                    $cond: [
+                    { $gt: [{ $size: "$variantes" }, 0] },
+                    {
+                        $map: {
+                        input: "$variantes",
+                        as: "var",
+                        in: {
+                            $mergeObjects: [
+                            "$$var",
+                            {
+                                price: {
+                                $cond: [
+                                    { $and: [
+                                    { $ifNull: ["$$var.originalPrice", false] },
+                                    { $ne: ["$$var.price", "$$var.originalPrice"] }
+                                    ]},
+                                    { $round: ["$$var.originalPrice", 0] },
+                                    "$$var.price"
+                                ]
+                                }
+                            }
+                            ]
+                        }
+                        }
+                    },
+                    []
+                    ]
+                }
+                }
+            },
+            // Opcional: quitar originalPrice solo de productos sin variantes (o dejalo si querés)
+            {
+                $unset: {
+                originalPrice: {
+                    $cond: [
+                    { $eq: ["$variantes", []] },
+                    "$originalPrice",
+                    "$$REMOVE"
+                    ]
+                }
+                }
+            }
+            ]
+        );
+        console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
+        return result;
     };
-    eliminate = async (pid) => {
+
+
+    /* eliminate = async (pid) => {
         const productEliminated = await productsModel.deleteOne({ _id: pid });
+        return productEliminated;
+    } */
+    eliminate = async (pid) => {
+        const productEliminated = await productsModel.deleteOne({ _id: pid, deleted: true });
         return productEliminated;
     }
     massDelete = async (ids) => {

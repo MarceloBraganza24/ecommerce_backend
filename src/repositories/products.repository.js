@@ -5,6 +5,9 @@ export default class ProductsRepository {
     getById = async (pid, session = null) => {
         return await this.dao.getById(pid, session);
     };
+    getByIdIncludeDeleted = async (pid, session = null) => {
+        return await this.dao.getByIdIncludeDeleted(pid, session);
+    };
     updateSoftDelete = async(pid) => {
         const productsUpdated = await this.dao.updateSoftDelete(pid);
         return productsUpdated;

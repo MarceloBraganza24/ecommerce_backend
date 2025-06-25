@@ -212,7 +212,7 @@ const restorePricesByCategories = async (req, res) => {
 const eliminate = async (req, res) => {
     try {
         const { pid } = req.params;
-        const product = await productsService.getById(pid);
+        const product = await productsService.getByIdIncludeDeleted(pid);
 
         if (!product) {
         return res.status(404).json({ message: 'Producto no encontrado' });
@@ -233,7 +233,7 @@ const massDelete = async (req, res) => {
       return res.status(400).json({ message: 'IDs inválidos' });
     }
 
-    await productsService.massDelete(ids); // asumimos que tu service tiene esta función
+    await productsService.massDelete(ids);
     res.sendSuccess('Productos eliminados');
 
   } catch (error) {

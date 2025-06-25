@@ -9,6 +9,10 @@ const getById = async (pid, session = null) => {
     const product = await productsRepository.getById(pid, session);
     return product;
 };
+const getByIdIncludeDeleted = async (pid, session = null) => {
+    const product = await productsRepository.getByIdIncludeDeleted(pid, session);
+    return product;
+};
 const updateSoftDelete = async(pid) => {
     const productUpdated = await productsRepository.updateSoftDelete(pid);
     return productUpdated;
@@ -112,6 +116,7 @@ const massRestore = async(ids) => {
 export {
     getById,
     getAll,
+    getByIdIncludeDeleted,
     updateSoftDelete,
     getDeleted,
     getAllByPage,

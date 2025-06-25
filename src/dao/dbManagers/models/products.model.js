@@ -19,16 +19,15 @@ const productsSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        required: true
+        required: function () {
+            // Requiere price solo si no hay variantes
+            return !this.variantes || this.variantes.length === 0;
+        }
     },
     originalPrice: {
         type: Number,
         required: false
     },
-    /* stock: {
-        type: Number,
-        required: true
-    }, */
     stock: {
         type: Number,
         required: function() { return !this.variantes || this.variantes.length === 0; }
@@ -60,6 +59,14 @@ const productsSchema = new mongoose.Schema({
                 stock: {
                     type: Number,
                     required: true
+                },
+                price: {
+                    type: Number,
+                    required: true
+                },
+                originalPrice: {
+                    type: Number,
+                    required: false // Solo si lo necesitás como respaldo
                 }
             }
         ],
