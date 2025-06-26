@@ -72,6 +72,11 @@ export default class Products {
         const products = await productsModel.paginate(fullQuery, { page, limit });
         return products; 
     }
+    navbarSearch = async (query = {}) => {
+        const fullQuery = { ...query, deleted: false };
+        const products = await productsModel.find(fullQuery);
+        return products;
+    };
     getIdsByTitle = async (title) => {
         const products = await productsModel.find(
             { title: { $regex: title, $options: "i" }, deleted: false },

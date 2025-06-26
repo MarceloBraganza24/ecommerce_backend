@@ -33,6 +33,10 @@ const getAllByPage = async(query, { page, limit }) => {
     const products = await productsRepository.getAllByPage(query, { page, limit });
     return products;
 }
+const navbarSearch = async(query) => {
+    const products = await productsRepository.navbarSearch(query);
+    return products;
+}
 const groupedByCategory = async(limit) => {
     const products = await productsRepository.groupedByCategory(limit);
     return products;
@@ -116,6 +120,7 @@ const massRestore = async(ids) => {
 export {
     getById,
     getAll,
+    navbarSearch,
     getByIdIncludeDeleted,
     updateSoftDelete,
     getDeleted,

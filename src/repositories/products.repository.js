@@ -28,6 +28,10 @@ export default class ProductsRepository {
         const products = await this.dao.getAllByPage(query, { page, limit });
         return products;
     }
+    navbarSearch = async(query) => {
+        const products = await this.dao.navbarSearch(query);
+        return products;
+    }
     groupedByCategory = async(limit) => {
         const products = await this.dao.groupedByCategory(limit);
         return products;

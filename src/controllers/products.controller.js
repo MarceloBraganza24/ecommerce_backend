@@ -45,6 +45,34 @@ const groupedByCategory = async (req, res) => {
         req.logger.error(error.message);
     }
 };
+const navbarSearch = async (req, res) => {
+    try {
+        const { search = "" } = req.query;
+
+        // Si no hay término de búsqueda, no devuelvas nada (opcional)
+        if (!search.trim()) {
+            return res.sendSuccess([]);
+        }
+
+        const query = {
+            deleted: false,
+            $or: [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } },
+            ].filter(Boolean)
+        };
+
+        //const products = await productsService.getAllByPage(query).limit(50); // límite de seguridad
+        const products = await productsService.navbarSearch(query);
+        res.sendSuccess(products);
+    } catch (error) {
+        req.logger.error(error.message);
+        res.sendServerError(error.message);
+    }
+};
+
+
 const getAllByPage = async (req, res) => {
     try {
         const { page = 1, limit = 25, search = "", field = "" } = req.query;
@@ -118,7 +146,7 @@ const save = async (req, res) => {
         if (req.body.variantes) {
             variantes = JSON.parse(req.body.variantes);
         }
-        if (!title || !description || !price || !state || !category || !images || images.length === 0) {
+        if (!title || !description || !state || !category || !images || images.length === 0) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
         const imagePaths = images.map(file => file.path);
@@ -163,7 +191,8 @@ const update = async (req, res) => {
             category,
             camposExtras: propiedadesParsed,
             images: imagenesFinales,
-            ...(variantes.length > 0 && { variantes }) // Solo si hay variantes
+            variantes
+            //...(variantes.length > 0 && { variantes }) // Solo si hay variantes
         });
         if (!updatedProduct) {
             return res.status(404).json({ message: 'Producto no encontrado' });
@@ -275,6 +304,7 @@ const massRestore = async (req, res) => {
 export {
     getAll,
     getDeleted,
+    navbarSearch,
     getAllBy,
     updateRestoreProduct,
     getAllByPage,
