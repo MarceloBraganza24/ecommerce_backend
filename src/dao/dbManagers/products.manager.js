@@ -182,7 +182,7 @@ export default class Products {
         console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
         return result;
     }; */
-    restorePricesByCategories = async (categories) => {
+    /* restorePricesByCategories = async (categories) => {
         const result = await productsModel.updateMany(
             {
             category: { $in: categories },
@@ -264,7 +264,91 @@ export default class Products {
         );
         console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
         return result;
+    }; */
+    restorePricesByCategories = async (categories) => {
+        // Paso 1: Restaurar precios
+        const restoreResult = await productsModel.updateMany(
+            {
+                category: { $in: categories },
+                $or: [
+                    {
+                        $and: [
+                            { variantes: { $eq: [] } },
+                            { $expr: { $ne: ["$price", "$originalPrice"] } }
+                        ]
+                    },
+                    {
+                        // No usamos $expr acá
+                        variantes: {
+                            $elemMatch: {
+                                originalPrice: { $exists: true, $ne: null },
+                                price: { $exists: true }
+                            }
+                        }
+                    }
+                ]
+            },
+            [
+                {
+                    $set: {
+                        price: {
+                            $cond: [
+                                { $eq: ["$variantes", []] },
+                                { $round: ["$originalPrice", 0] },
+                                "$price"
+                            ]
+                        },
+                        variantes: {
+                            $cond: [
+                                { $gt: [{ $size: "$variantes" }, 0] },
+                                {
+                                    $map: {
+                                        input: "$variantes",
+                                        as: "var",
+                                        in: {
+                                            $mergeObjects: [
+                                                "$$var",
+                                                {
+                                                    price: {
+                                                        $cond: [
+                                                            {
+                                                                $and: [
+                                                                    { $ifNull: ["$$var.originalPrice", false] },
+                                                                    { $ne: ["$$var.price", "$$var.originalPrice"] }
+                                                                ]
+                                                            },
+                                                            { $round: ["$$var.originalPrice", 0] },
+                                                            "$$var.price"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                []
+                            ]
+                        }
+                    }
+                }
+            ]
+        );
+
+        // Paso 2: Quitar originalPrice si no tiene variantes
+        const unsetResult = await productsModel.updateMany(
+            { variantes: { $eq: [] }, originalPrice: { $exists: true } },
+            { $unset: { originalPrice: "" } }
+        );
+
+        console.log(`🛠 Restaurados: ${restoreResult.modifiedCount}, OriginalPrice eliminado en: ${unsetResult.modifiedCount}`);
+
+        return {
+            modifiedCount: restoreResult.modifiedCount,
+            originalPriceUnset: unsetResult.modifiedCount
+        };
     };
+
+
 
 
     /* eliminate = async (pid) => {
