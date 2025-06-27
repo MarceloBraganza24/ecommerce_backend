@@ -88,6 +88,35 @@ const decreaseStock = async (productId, quantity, session = null) => {
     product.stock -= quantity;
     await productsRepository.update(productId, product, session);
 };
+const decreaseVariantStock = async (productId, camposSeleccionados, quantity, session = null) => {
+    const product = await productsRepository.getById(productId, session);
+    if (!product) throw new Error('Producto no encontrado');
+
+    const varianteIndex = product.variantes.findIndex(v =>
+        Object.entries(camposSeleccionados).every(
+            ([key, val]) => v.campos?.[key] === val
+        )
+    );
+
+    if (varianteIndex === -1) {
+        throw new Error(`Variante no encontrada para el producto ${product.title}`);
+    }
+
+    const variante = product.variantes[varianteIndex];
+
+    if (variante.stock < quantity) {
+        throw new Error(`Stock insuficiente para la variante de ${product.title}`);
+    }
+
+    // Descontar el stock de la variante
+    //product.variantes[varianteIndex].stock -= quantity;
+    console.log('Stock antes:', product.variantes[varianteIndex].stock);
+    product.variantes[varianteIndex].stock -= quantity;
+    console.log('Stock después:', product.variantes[varianteIndex].stock);
+
+    await productsRepository.update(productId, product, session);
+};
+
 const update = async(pid, productToReplace) => {
     const productUpdated = await productsRepository.update(pid, productToReplace);
     return productUpdated;
@@ -131,6 +160,7 @@ export {
     save,
     updateRestoreProduct,
     decreaseStock,
+    decreaseVariantStock,
     update,
     updatePricesByCategories,
     restorePricesByCategories,

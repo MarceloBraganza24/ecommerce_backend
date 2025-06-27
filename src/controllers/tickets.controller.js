@@ -129,21 +129,12 @@ const saveAdminSale = async (req, res) => {
         const { amount, payer_email, items, deliveryMethod, purchase_datetime, user_role } = req.body;
         // Validar stock usando la sesión
         for (const item of items) {
-            const product = await productsService.getById(item._id, session);
-            if (!product) {
-                await session.abortTransaction();
-                session.endSession();
-                return res.status(404).json({ status: "error", message: `Producto con ID ${item._id} no encontrado.` });
+            if (item.camposSeleccionados && Object.keys(item.camposSeleccionados).length > 0) {
+                await productsService.decreaseVariantStock(item._id, item.camposSeleccionados, item.quantity, session);
+            } else {
+                await productsService.decreaseStock(item._id, item.quantity, session);
             }
-            if (product.stock < item.quantity) {
-                await session.abortTransaction();
-                session.endSession();
-                return res.status(400).json({
-                    status: "error",
-                    message: `Stock insuficiente para "${product.title}". Stock disponible: ${product.stock}, solicitado: ${item.quantity}`,
-                });
-            }
-        }
+        }   
         // Crear snapshot para el ticket
         const itemsFiltered = items.map(item => ({
             product: item._id,
@@ -166,11 +157,6 @@ const saveAdminSale = async (req, res) => {
 
         // Guardar ticket con sesión
         const ticket = await ticketsService.save(newTicket, session);
-
-        // Descontar stock con sesión
-        for (const item of items) {
-            await productsService.decreaseStock(item._id, item.quantity, session);
-        }
 
         await session.commitTransaction();
         session.endSession();
