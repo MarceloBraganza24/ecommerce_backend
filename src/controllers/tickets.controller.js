@@ -129,6 +129,8 @@ const saveAdminSale = async (req, res) => {
         const { amount, payer_email, items, deliveryMethod, purchase_datetime, user_role } = req.body;
         // Validar stock usando la sesión
         for (const item of items) {
+            // console.log(`🛬 Producto recibido: ${item.title}`);
+            // console.log('Campos seleccionados:', item.camposSeleccionados);
             if (item.camposSeleccionados && Object.keys(item.camposSeleccionados).length > 0) {
                 await productsService.decreaseVariantStock(item._id, item.camposSeleccionados, item.quantity, session);
             } else {

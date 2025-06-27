@@ -92,28 +92,6 @@ export default class Products {
         const options = session ? { session } : {};
         return await productsModel.updateOne({ _id: pid }, productToReplace, options);
     }
-    /* updatePricesByCategories = async (categories, percentage) => {
-        const factor = 1 + (percentage / 100);
-
-        const result = await productsModel.updateMany(
-            { category: { $in: categories } },
-            [
-                {
-                    $set: {
-                        originalPrice: {
-                            $cond: [
-                                { $ifNull: ["$originalPrice", false] },
-                                "$originalPrice",
-                                "$price"
-                            ]
-                        },
-                        price: { $round: [{ $multiply: ["$price", factor] }, 0] } // 🎯 redondea sin decimales
-                    }
-                }
-            ]
-        );
-        return result;
-    }; */
     updatePricesByCategories = async (categories, percentage) => {
         const factor = 1 + (percentage / 100);
 
@@ -161,124 +139,24 @@ export default class Products {
 
         return result;
     };
-
-    /* restorePricesByCategories = async (categories) => {
-        const result = await productsModel.updateMany(
-            {
-                category: { $in: categories },
-                originalPrice: { $exists: true, $ne: null }
-            },
-            [
-                {
-                    $set: {
-                        price: { $round: ["$originalPrice", 0] }
-                    }
-                },
-                {
-                    $unset: "originalPrice"
-                }
-            ]
-        );
-        console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
-        return result;
-    }; */
-    /* restorePricesByCategories = async (categories) => {
-        const result = await productsModel.updateMany(
-            {
-            category: { $in: categories },
-            $or: [
-                // Producto sin variantes con price distinto a originalPrice
-                {
-                $and: [
-                    { variantes: { $eq: [] } }, 
-                    { $expr: { $ne: ["$price", "$originalPrice"] } }
-                ]
-                },
-                // Producto con variantes donde al menos una variante tiene price distinto a originalPrice
-                {
-                variantes: { 
-                    $elemMatch: { 
-                    originalPrice: { $exists: true, $ne: null },
-                    $expr: { $ne: ["$price", "$originalPrice"] }
-                    }
-                }
-                }
-            ]
-            },
-            [
-            {
-                $set: {
-                // Para productos sin variantes
-                price: {
-                    $cond: [
-                    { $eq: ["$variantes", []] },
-                    { $round: ["$originalPrice", 0] },
-                    "$price"
-                    ]
-                },
-                // Para productos con variantes: actualiza el price de cada variante solo si es necesario
-                variantes: {
-                    $cond: [
-                    { $gt: [{ $size: "$variantes" }, 0] },
-                    {
-                        $map: {
-                        input: "$variantes",
-                        as: "var",
-                        in: {
-                            $mergeObjects: [
-                            "$$var",
-                            {
-                                price: {
-                                $cond: [
-                                    { $and: [
-                                    { $ifNull: ["$$var.originalPrice", false] },
-                                    { $ne: ["$$var.price", "$$var.originalPrice"] }
-                                    ]},
-                                    { $round: ["$$var.originalPrice", 0] },
-                                    "$$var.price"
-                                ]
-                                }
-                            }
-                            ]
-                        }
-                        }
-                    },
-                    []
-                    ]
-                }
-                }
-            },
-            // Opcional: quitar originalPrice solo de productos sin variantes (o dejalo si querés)
-            {
-                $unset: {
-                originalPrice: {
-                    $cond: [
-                    { $eq: ["$variantes", []] },
-                    "$originalPrice",
-                    "$$REMOVE"
-                    ]
-                }
-                }
-            }
-            ]
-        );
-        console.log(`Se restauraron precios en ${result.modifiedCount} productos.`);
-        return result;
-    }; */
     restorePricesByCategories = async (categories) => {
-        // Paso 1: Restaurar precios
         const restoreResult = await productsModel.updateMany(
             {
                 category: { $in: categories },
                 $or: [
                     {
                         $and: [
-                            { variantes: { $eq: [] } },
+                            {
+                                $or: [
+                                    { variantes: { $exists: false } },
+                                    { variantes: { $eq: [] } },
+                                    { variantes: null }
+                                ]
+                            },
                             { $expr: { $ne: ["$price", "$originalPrice"] } }
                         ]
                     },
                     {
-                        // No usamos $expr acá
                         variantes: {
                             $elemMatch: {
                                 originalPrice: { $exists: true, $ne: null },
@@ -293,14 +171,20 @@ export default class Products {
                     $set: {
                         price: {
                             $cond: [
-                                { $eq: ["$variantes", []] },
+                                {
+                                    $or: [
+                                        { $eq: ["$variantes", []] },
+                                        { $eq: ["$variantes", null] },
+                                        { $not: ["$variantes"] }
+                                    ]
+                                },
                                 { $round: ["$originalPrice", 0] },
                                 "$price"
                             ]
                         },
                         variantes: {
                             $cond: [
-                                { $gt: [{ $size: "$variantes" }, 0] },
+                                { $gt: [{ $size: { $ifNull: ["$variantes", []] } }, 0] },
                                 {
                                     $map: {
                                         input: "$variantes",
@@ -334,19 +218,11 @@ export default class Products {
             ]
         );
 
-        // Paso 2: Quitar originalPrice si no tiene variantes
-        const unsetResult = await productsModel.updateMany(
-            { variantes: { $eq: [] }, originalPrice: { $exists: true } },
-            { $unset: { originalPrice: "" } }
-        );
-
-        console.log(`🛠 Restaurados: ${restoreResult.modifiedCount}, OriginalPrice eliminado en: ${unsetResult.modifiedCount}`);
-
         return {
             modifiedCount: restoreResult.modifiedCount,
-            originalPriceUnset: unsetResult.modifiedCount
         };
     };
+
 
 
 

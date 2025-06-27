@@ -92,11 +92,24 @@ const decreaseVariantStock = async (productId, camposSeleccionados, quantity, se
     const product = await productsRepository.getById(productId, session);
     if (!product) throw new Error('Producto no encontrado');
 
+    // console.log('🧪 Buscando variante para:', product.title);
+    // console.log('Campos seleccionados:', camposSeleccionados);
+    // console.log('Variantes del producto:', product.variantes.map(v => v.campos));
+
     const varianteIndex = product.variantes.findIndex(v =>
+        Object.entries(camposSeleccionados).every(
+            ([key, val]) => {
+                const valorVariante = v.campos instanceof Map ? v.campos.get(key) : v.campos?.[key];
+                return valorVariante?.trim?.().toLowerCase?.() === val.trim().toLowerCase();
+            }
+        )
+    );
+
+    /* const varianteIndex = product.variantes.findIndex(v =>
         Object.entries(camposSeleccionados).every(
             ([key, val]) => v.campos?.[key] === val
         )
-    );
+    ); */
 
     if (varianteIndex === -1) {
         throw new Error(`Variante no encontrada para el producto ${product.title}`);
