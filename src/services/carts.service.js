@@ -34,7 +34,7 @@ const eliminate = async(user_id) => {
     return cartEliminated;
 }
 
-let amount = 0;
+/* let amount = 0;
 const purchase = async (cid) => {
     const session = await mongoose.startSession();
     const outStock = [];
@@ -73,7 +73,79 @@ const purchase = async (cid) => {
     } finally {
         session.endSession();
     }
+}; */
+const purchase = async (cid) => {
+    const session = await mongoose.startSession();
+    const outStock = [];
+    let amount = 0;
+
+    try {
+        session.startTransaction();
+        const cart = await cartsRepository.getById(cid);
+
+        for (const item of cart.products) {
+            const { product, quantity, selectedVariant } = item;
+
+            if (selectedVariant) {
+                // Si el producto tiene variante seleccionada
+                const variantIndex = product.variantes.findIndex(v => v._id.toString() === selectedVariant._id.toString());
+
+                if (variantIndex !== -1) {
+                    const variant = product.variantes[variantIndex];
+
+                    if (variant.stock >= quantity) {
+                        amount += variant.price * quantity;
+                        variant.stock -= quantity;
+                        variant.number_sales = Number(variant.number_sales || 0) + quantity;
+
+                        product.variantes[variantIndex] = variant;
+                        await productsRepository.update(product._id, product);
+                    } else {
+                        outStock.push({ product, quantity, selectedVariant });
+                    }
+                } else {
+                    // Variante no encontrada, se considera como sin stock
+                    outStock.push({ product, quantity, selectedVariant });
+                }
+
+            } else {
+                // Producto sin variantes
+                if (product.stock >= quantity) {
+                    amount += product.price * quantity;
+                    product.stock -= quantity;
+                    product.number_sales = Number(product.number_sales || 0) + quantity;
+
+                    await productsRepository.update(product._id, product);
+                } else {
+                    outStock.push({ product, quantity });
+                }
+            }
+        }
+
+        // Actualizar carrito
+        if (outStock.length > 0) {
+            await cartsRepository.update(cid, {
+                products: outStock.map(({ product, quantity, selectedVariant }) => ({
+                    product: product._id,
+                    quantity,
+                    ...(selectedVariant && { selectedVariant })
+                }))
+            });
+        } else {
+            await cartsRepository.update(cid, { products: [] });
+        }
+
+        await session.commitTransaction();
+        return outStock;
+
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
+
 
 export {
     getAll,

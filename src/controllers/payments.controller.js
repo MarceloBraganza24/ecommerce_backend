@@ -12,16 +12,17 @@ const createPreferencePurchase = async (req, res) => {
         const itemsToSave = items.map(item => ({
             id: item.product._id,
             title: item.product.title,
-            unit_price: Number(item.product.price),
+            unit_price: Number(item.selectedVariant?.price ?? item.product.price),
             quantity: item.quantity,
             currency_id: "ARS",
             images: item.product.images,
+            variantes: item.selectedVariant?.campos || null,
         }));
 
         const itemsFormateados = items.map(item => ({
             id: item.product._id,
             title: item.product.title,
-            unit_price: Number(item.product.price),
+            unit_price: Number(item.selectedVariant?.price ?? item.product.price),
             quantity: item.quantity,
             currency_id: "ARS"
         }));
