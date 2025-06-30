@@ -31,60 +31,6 @@ const getByUserId = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const save = async (req, res) => {
-    try {
-        const { user_id, products } = req.body;
-        let cart = await cartsService.getByUserId(user_id);
-
-        console.log("🛒 Carrito actual:");
-        cart.products.forEach((p, i) => {
-            console.log(`- Producto ${i}:`, {
-                product: (p.product._id || p.product).toString(),
-                selectedVariant: p.selectedVariant
-            });
-        });
-
-        if (!cart) {
-            // ✅ Si no hay carrito, lo creamos y salimos de la función
-            const cartSaved = await cartsService.save(user_id, products);
-            return res.sendSuccessNewResourse(cartSaved);
-        }
-        const variantsAreEqual = (v1, v2) => {
-            if (!v1 && !v2) return true; // ambos null o undefined → OK
-            if (!v1 || !v2) return false; // uno es null y el otro no → no coinciden
-
-            // Si tienen campos, comparamos los campos
-            return _.isEqual(v1.campos, v2.campos);
-        };
-
-        products.forEach(({ product, quantity, selectedVariant }) => {
-            const productId = new mongoose.Types.ObjectId(product);
-
-            const getProductId = p => (p.product._id || p.product).toString();
-
-            const existingProductIndex = cart.products.findIndex(p =>
-                getProductId(p) === productId.toString() &&
-                variantsAreEqual(p.selectedVariant, selectedVariant)
-            );
-
-            if (existingProductIndex !== -1) {
-                cart.products[existingProductIndex].quantity += quantity;
-            } else {
-                cart.products.push({ product: productId, quantity, selectedVariant });
-            }
-        });
-
-
-        // ✅ Guardamos los cambios en MongoDB
-        await cartsService.update(cart._id, { products: cart.products });
-
-        return res.sendSuccessNewResourse(cart);
-
-    } catch (error) {
-        res.sendServerError(error.message); 
-        req.logger.error(error.message);
-    }
-}; */
 const save = async (req, res) => {
     try {
         const { user_id, products } = req.body;
@@ -182,29 +128,6 @@ const update = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const updateProductQuantity = async (req, res) => {
-    try {
-        const { uid } = req.params;
-        const { product, quantity } = req.body;
-
-        let cart = await cartsService.getByUserId(uid);
-        if (!cart) {
-            return res.status(404).json({ message: "Carrito no encontrado" });
-        }
-        const item = cart.products.find(p => p.product._id.toString() === product);
-        if (!item) {
-            return res.status(404).json({ message: "Producto no encontrado en el carrito" });
-        }
-
-        item.quantity = quantity; // Actualiza la cantidad
-        await cartsService.update(cart._id, { products: cart.products });
-
-        res.json({ message: "Cantidad actualizada", cart });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error en el servidor" });
-    }
-}; */
 const updateProductQuantity = async (req, res) => {
     try {
         const { uid } = req.params;
@@ -234,62 +157,6 @@ const updateProductQuantity = async (req, res) => {
         res.status(500).json({ message: "Error en el servidor" });
     }
 };
-
-/* const removeProductFromCart = async (req, res) => {
-    try {
-        const { user_id, product_id } = req.params;
-        // Buscar el carrito del usuario
-        let cart = await cartsService.getByUserId(user_id);
-        if (!cart) {
-            return res.status(404).json({ message: "Carrito no encontrado" });
-        }
-        // Filtrar productos, dejando solo los que NO sean el que queremos eliminar
-        cart.products = cart.products.filter(p => p.product._id.toString() !== product_id);
-
-        if (cart.products.length == 0) {
-            // Si no quedan productos, eliminar el carrito completamente
-            await cartsService.eliminate(cart.user_id);
-            return res.json({ message: "Carrito eliminado porque no tenía más productos" });
-        }
-
-        // Guardar cambios
-        await cartsService.update(cart._id, { products: cart.products });
-
-        return res.json({ message: "Producto eliminado del carrito", cart });
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}; */
-/* const removeProductFromCart = async (req, res) => {
-    try {
-        const { user_id, product_id } = req.params;
-        const { selectedVariant } = req.body;
-
-        let cart = await cartsService.getByUserId(user_id);
-        if (!cart) {
-            return res.status(404).json({ message: "Carrito no encontrado" });
-        }
-
-        cart.products = cart.products.filter(p =>
-            !(
-                p.product._id.toString() === product_id &&
-                JSON.stringify(p.selectedVariant) === JSON.stringify(selectedVariant)
-            )
-        );
-
-        if (cart.products.length === 0) {
-            await cartsService.eliminate(cart.user_id);
-            return res.json({ message: "Carrito eliminado porque no tenía más productos" });
-        }
-
-        await cartsService.update(cart._id, { products: cart.products });
-        return res.json({ message: "Producto eliminado del carrito", cart });
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}; */
 const removeProductFromCart = async (req, res) => {
     try {
         const { user_id, product_id } = req.params;

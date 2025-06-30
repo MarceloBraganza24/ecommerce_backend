@@ -2,6 +2,7 @@ import { MercadoPagoConfig, Preference,Payment  } from 'mercadopago'; // Asegura
 import config from '../config/config.js';
 import * as ticketsService from '../services/tickets.service.js';
 import * as cartsService from '../services/carts.service.js';
+import * as productsService from '../services/products.service.js';
 
 const client = new MercadoPagoConfig({ accessToken: config.access_token_mp });
 
@@ -76,26 +77,59 @@ const createPreferencePurchase = async (req, res) => {
 const webhookPayment = async (req, res) => {
     try {
         const { type, 'data.id': paymentId } = req.query;
-  
+
         if (type === 'payment' && paymentId) {
             const paymentClient = new Payment(client);
             const payment = await paymentClient.get({ id: paymentId });
-  
+
             if (payment.status === 'approved') {
                 const items = payment.metadata?.items_to_save;
-                const itemsFiltered = items.map(item => ({
-                    product: item.id,
-                    quantity: parseInt(item.quantity, 10),
-                    snapshot: {
-                        title: item.title,
-                        price: item.unit_price,
-                        image: item.images[0],
-                    }
-                }));
                 const shippingAddress = payment.metadata?.shipping_address;
                 const deliveryMethod = payment.metadata?.delivery_method;
                 const user_cart_id = payment.metadata?.user_cart_id;
                 const user_role = payment.metadata?.user_role;
+
+                /* const itemsFiltered = await Promise.all(items.map(async item => {
+                    const productData = await productsService.getById(item.id); // Buscamos el producto completo
+                    const variant = item.selectedVariant;
+
+                    return {
+                        product: productData.id,
+                        quantity: parseInt(item.quantity, 10),
+                        selectedVariant: variant ?? undefined,
+                        snapshot: {
+                            title: productData.title,
+                            price: variant?.price ?? productData.price,
+                            image: productData.images?.[0] ?? null,
+                        }
+                    };
+                })); */
+                const itemsFiltered = await Promise.all(items.map(async item => {
+                    const productData = await productsService.getById(item.id);
+                    const variant = item.selectedVariant;
+
+                    const snapshot = {
+                        title: productData.title,
+                        price: variant?.price ?? productData.price,
+                        image: productData.images?.[0] ?? null,
+                    };
+
+                    if (variant) {
+                        snapshot.variant = {
+                            campos: variant.campos || {},
+                            price: variant.price,
+                            stock: variant.stock
+                        };
+                    }
+
+                    return {
+                        product: productData.id,
+                        quantity: parseInt(item.quantity, 10),
+                        selectedVariant: variant ?? undefined,
+                        snapshot
+                    };
+                }));
+
 
                 const newTicket = {
                     mp_payment_id: payment.id,
@@ -106,21 +140,24 @@ const webhookPayment = async (req, res) => {
                     shippingAddress,
                     deliveryMethod,
                     purchase_datetime: payment.date_created,
-                    user_role: user_role?user_role:'user'
-                }
+                    user_role: user_role ?? 'user'
+                };
+
                 const ticketSaved = await ticketsService.save(newTicket);
                 await cartsService.purchase(user_cart_id);
-                console.log(`Pago aprobado y guardado: ${payment.id}`);
+                console.log(`✅ Pago aprobado y ticket generado: ${payment.id}`);
+
                 return res.sendSuccessNewResourse(ticketSaved);
             }
         }
-  
-        res.sendStatus(200); // Mercado Pago necesita un 200 OK
+
+        res.sendStatus(200); // Mercado Pago requiere 200 OK
     } catch (error) {
-        console.error('Error en webhook:', error);
+        console.error('❌ Error en webhook:', error);
         res.sendStatus(500);
     }
 };
+
 
 export {
     createPreferencePurchase,
