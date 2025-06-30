@@ -48,68 +48,68 @@ const save = async (req, res) => {
         };
 
         // ⚖️ Test rápido del comparador
-        console.log("⚖️ Test rápido de variantsAreEqual:");
-        console.log("undefined vs undefined:", variantsAreEqual(undefined, undefined));
-        console.log("null vs undefined:", variantsAreEqual(null, undefined));
-        console.log("{} vs undefined:", variantsAreEqual({}, undefined));
-        console.log("undefined vs {}:", variantsAreEqual(undefined, {}));
+        // console.log("⚖️ Test rápido de variantsAreEqual:");
+        // console.log("undefined vs undefined:", variantsAreEqual(undefined, undefined));
+        // console.log("null vs undefined:", variantsAreEqual(null, undefined));
+        // console.log("{} vs undefined:", variantsAreEqual({}, undefined));
+        // console.log("undefined vs {}:", variantsAreEqual(undefined, {}));
 
         if (!cart) {
             // ✅ Carrito nuevo
-            console.log("🆕 No existía carrito, lo creamos...");
+            //console.log("🆕 No existía carrito, lo creamos...");
             const cartSaved = await cartsService.save(user_id, products);
             return res.sendSuccessNewResourse(cartSaved);
         }
 
-        console.log("🛒 Carrito existente. Contenido actual:");
+        /* console.log("🛒 Carrito existente. Contenido actual:");
         cart.products.forEach((p, i) => {
             console.log(`- Producto ${i}:`, {
                 id: getProductId(p),
                 quantity: p.quantity,
                 selectedVariant: p.selectedVariant
             });
-        });
+        }); */
 
         products.forEach(({ product, quantity, selectedVariant }) => {
             const productId = new mongoose.Types.ObjectId(product);
 
-            console.log("\n📦 Producto nuevo a agregar:");
+            /* console.log("\n📦 Producto nuevo a agregar:");
             console.log({
                 product: productId.toString(),
                 quantity,
                 selectedVariant
-            });
+            }); */
 
             const existingProductIndex = cart.products.findIndex(p => {
                 const existingProductId = getProductId(p);
                 const variantsMatch = variantsAreEqual(p.selectedVariant, selectedVariant);
 
-                console.log("🔍 Comparando con producto en carrito:");
-                console.log("  ID existente:", existingProductId);
-                console.log("  ID nuevo:    ", productId.toString());
-                console.log("  Variante existente:", p.selectedVariant);
-                console.log("  Variante nueva:    ", selectedVariant);
-                console.log("  Coinciden variantes:", variantsMatch);
+                // console.log("🔍 Comparando con producto en carrito:");
+                // console.log("  ID existente:", existingProductId);
+                // console.log("  ID nuevo:    ", productId.toString());
+                // console.log("  Variante existente:", p.selectedVariant);
+                // console.log("  Variante nueva:    ", selectedVariant);
+                // console.log("  Coinciden variantes:", variantsMatch);
 
                 return existingProductId === productId.toString() && variantsMatch;
             });
 
             if (existingProductIndex !== -1) {
-                console.log("✅ Producto ya existe, sumando cantidad...");
+                //console.log("✅ Producto ya existe, sumando cantidad...");
                 cart.products[existingProductIndex].quantity += quantity;
             } else {
-                console.log("➕ Producto no existe en carrito, agregando nuevo...");
+                //console.log("➕ Producto no existe en carrito, agregando nuevo...");
                 cart.products.push({ product: productId, quantity, selectedVariant });
             }
         });
 
         await cartsService.update(cart._id, { products: cart.products });
-        console.log("💾 Carrito actualizado correctamente");
+        //console.log("💾 Carrito actualizado correctamente");
 
         return res.sendSuccessNewResourse(cart);
 
     } catch (error) {
-        console.error("❌ Error en save cart:", error.message);
+        //console.error("❌ Error en save cart:", error.message);
         res.sendServerError(error.message);
     }
 };
@@ -162,9 +162,9 @@ const removeProductFromCart = async (req, res) => {
         const { user_id, product_id } = req.params;
         const { selectedVariant } = req.body;
 
-        console.log("=== Eliminando producto del carrito ===");
-        console.log("Producto ID recibido:", product_id);
-        console.log("Variante recibida:", selectedVariant);
+        // console.log("=== Eliminando producto del carrito ===");
+        // console.log("Producto ID recibido:", product_id);
+        // console.log("Variante recibida:", selectedVariant);
 
         const normalizeVariantCampos = (campos = {}) => {
             const result = {};
@@ -200,7 +200,7 @@ const removeProductFromCart = async (req, res) => {
 
         const originalLength = cart.products.length;
 
-        cart.products = cart.products.filter(p => {
+        /* cart.products = cart.products.filter(p => {
             const matches =
                 p.product._id?.toString() === product_id &&
                 variantsAreEqual(p.selectedVariant, selectedVariant);
@@ -222,7 +222,7 @@ const removeProductFromCart = async (req, res) => {
         });
 
         console.log("🧾 Productos restantes en el carrito:", cart.products.length);
-        console.log("🧾 Cart ID:", cart._id.toString());
+        console.log("🧾 Cart ID:", cart._id.toString()); */
 
         if (cart.products.length === originalLength) {
             return res.status(404).json({ message: "Producto no encontrado en el carrito" });

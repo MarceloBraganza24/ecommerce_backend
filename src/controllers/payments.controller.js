@@ -10,6 +10,8 @@ const createPreferencePurchase = async (req, res) => {
     try {
         const { items,user,shippingAddress,deliveryMethod,discount,user_cart_id } = req.body;
 
+        console.log(items)
+
         const itemsToSave = items.map(item => ({
             id: item.product._id,
             title: item.product.title,
@@ -17,7 +19,7 @@ const createPreferencePurchase = async (req, res) => {
             quantity: item.quantity,
             currency_id: "ARS",
             images: item.product.images,
-            variantes: item.selectedVariant?.campos || null,
+            selectedVariant: item.selectedVariant ?? null, // ✅ CORREGIDO
         }));
 
         const itemsFormateados = items.map(item => ({
@@ -89,21 +91,6 @@ const webhookPayment = async (req, res) => {
                 const user_cart_id = payment.metadata?.user_cart_id;
                 const user_role = payment.metadata?.user_role;
 
-                /* const itemsFiltered = await Promise.all(items.map(async item => {
-                    const productData = await productsService.getById(item.id); // Buscamos el producto completo
-                    const variant = item.selectedVariant;
-
-                    return {
-                        product: productData.id,
-                        quantity: parseInt(item.quantity, 10),
-                        selectedVariant: variant ?? undefined,
-                        snapshot: {
-                            title: productData.title,
-                            price: variant?.price ?? productData.price,
-                            image: productData.images?.[0] ?? null,
-                        }
-                    };
-                })); */
                 const itemsFiltered = await Promise.all(items.map(async item => {
                     const productData = await productsService.getById(item.id);
                     const variant = item.selectedVariant;
@@ -118,7 +105,6 @@ const webhookPayment = async (req, res) => {
                         snapshot.variant = {
                             campos: variant.campos || {},
                             price: variant.price,
-                            stock: variant.stock
                         };
                     }
 

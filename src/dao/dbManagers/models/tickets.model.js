@@ -27,14 +27,18 @@ const ticketsSchema = new mongoose.Schema({
                 type: Number,
                 required: true
             },
-            camposSeleccionados: {
-                type: mongoose.Schema.Types.Mixed, // ← permite guardar un objeto dinámico con variantes
-                default: {}
+            selectedVariant: {
+                type: mongoose.Schema.Types.Mixed, // Puede contener { campos, price, stock, etc. }
+                default: null
             },
             snapshot: { // <- esta es la copia del producto en el momento de la compra
                 title: String,
                 price: Number,
                 image: String,
+                variant: {
+                    campos: mongoose.Schema.Types.Mixed,
+                    price: Number
+                }
             }
         }
     ],

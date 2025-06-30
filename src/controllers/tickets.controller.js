@@ -14,7 +14,7 @@ const getAll = async (req, res) => {
 }
 const getAllByPage = async (req, res) => {
     try {
-        const { page = 1, limit = 25, search = "", field = "" } = req.query;
+        const { page = 1, limit = 20, search = "", field = "" } = req.query;
 
         let query = {};
         if (search) {
