@@ -10,8 +10,6 @@ const createPreferencePurchase = async (req, res) => {
     try {
         const { items,user,shippingAddress,deliveryMethod,discount,user_cart_id } = req.body;
 
-        console.log(items)
-
         const itemsToSave = items.map(item => ({
             id: item.product._id,
             title: item.product.title,
@@ -76,6 +74,8 @@ const createPreferencePurchase = async (req, res) => {
     }
 };
 
+
+
 const webhookPayment = async (req, res) => {
     try {
         const { type, 'data.id': paymentId } = req.query;
@@ -85,7 +85,22 @@ const webhookPayment = async (req, res) => {
             const payment = await paymentClient.get({ id: paymentId });
 
             if (payment.status === 'approved') {
-                const items = payment.metadata?.items_to_save;
+                function toCamelCase(obj) {
+                    if (Array.isArray(obj)) {
+                        return obj.map(toCamelCase);
+                    } else if (obj !== null && typeof obj === 'object') {
+                        return Object.fromEntries(
+                            Object.entries(obj).map(([key, value]) => [
+                                key.replace(/_([a-z])/g, (_, g) => g.toUpperCase()),
+                                toCamelCase(value)
+                            ])
+                        );
+                    }
+                    return obj;
+                }
+                const rawItems = payment.metadata?.items_to_save || [];
+                const items = toCamelCase(rawItems);
+
                 const shippingAddress = payment.metadata?.shipping_address;
                 const deliveryMethod = payment.metadata?.delivery_method;
                 const user_cart_id = payment.metadata?.user_cart_id;

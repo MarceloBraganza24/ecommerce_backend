@@ -129,11 +129,9 @@ const saveAdminSale = async (req, res) => {
         const { amount, payer_email, items, deliveryMethod, purchase_datetime, user_role } = req.body;
         // Validar stock usando la sesión
         for (const item of items) {
-            // console.log(`🛬 Producto recibido: ${item.title}`);
-            // console.log('Campos seleccionados:', item.camposSeleccionados);
             if (item.camposSeleccionados && Object.keys(item.camposSeleccionados).length > 0) {
                 await productsService.decreaseVariantStock(item._id, item.camposSeleccionados, item.quantity, session);
-            } else {
+                } else {
                 await productsService.decreaseStock(item._id, item.quantity, session);
             }
         }   
@@ -141,12 +139,19 @@ const saveAdminSale = async (req, res) => {
         const itemsFiltered = items.map(item => ({
             product: item._id,
             quantity: item.quantity,
+            selectedVariant: item.selectedVariant ?? null,
             snapshot: {
                 title: item.title,
-                price: item.price,
-                image: item.images[0],
-            }
-        }));
+                price: item.selectedVariant?.price ?? item.price,
+                image: item.images?.[0] ?? null,
+                variant: item.selectedVariant
+                    ? {
+                        campos: item.selectedVariant.campos || {},
+                        price: item.selectedVariant.price
+                    }
+                    : undefined
+                }
+            }));
 
         const newTicket = {
             amount,
@@ -159,7 +164,7 @@ const saveAdminSale = async (req, res) => {
 
         // Guardar ticket con sesión
         const ticket = await ticketsService.save(newTicket, session);
-
+        
         await session.commitTransaction();
         session.endSession();
 

@@ -123,9 +123,9 @@ const decreaseVariantStock = async (productId, camposSeleccionados, quantity, se
 
     // Descontar el stock de la variante
     //product.variantes[varianteIndex].stock -= quantity;
-    console.log('Stock antes:', product.variantes[varianteIndex].stock);
+    //console.log('Stock antes:', product.variantes[varianteIndex].stock);
     product.variantes[varianteIndex].stock -= quantity;
-    console.log('Stock después:', product.variantes[varianteIndex].stock);
+    //console.log('Stock después:', product.variantes[varianteIndex].stock);
 
     await productsRepository.update(productId, product, session);
 };

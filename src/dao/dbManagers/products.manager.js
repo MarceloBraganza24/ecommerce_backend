@@ -222,15 +222,6 @@ export default class Products {
             modifiedCount: restoreResult.modifiedCount,
         };
     };
-
-
-
-
-
-    /* eliminate = async (pid) => {
-        const productEliminated = await productsModel.deleteOne({ _id: pid });
-        return productEliminated;
-    } */
     eliminate = async (pid) => {
         const productEliminated = await productsModel.deleteOne({ _id: pid, deleted: true });
         return productEliminated;
