@@ -54,7 +54,7 @@ const ticketsSchema = new mongoose.Schema({
         required: true
     },
     purchase_datetime: {
-        type: String,
+        type: Date,
         required: true
     },
     user_role: {
