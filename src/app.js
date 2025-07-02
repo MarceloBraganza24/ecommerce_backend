@@ -21,6 +21,7 @@ import PaymentsRouter from "./routes/payments.router.js";
 import TicketsRouter from "./routes/tickets.router.js";
 import ContactRouter from "./routes/contact.router.js";
 import SettingsRouter from "./routes/settings.router.js";
+import FavoritesRouter from "./routes/favorites.router.js";
 
 const app = express();
 
@@ -37,6 +38,7 @@ const paymentsRouter = new PaymentsRouter();
 const ticketsRouter = new TicketsRouter();
 const contactRouter = new ContactRouter();
 const settingsRouter = new SettingsRouter();
+const favoritesRouter = new FavoritesRouter();
 
 app.use(addLogger);
 app.use(express.json({ type: 'application/json' }));
@@ -65,5 +67,6 @@ app.use('/api/payments', paymentsRouter.getRouter());
 app.use('/api/tickets', ticketsRouter.getRouter());
 app.use('/api/contact', contactRouter.getRouter());
 app.use('/api/settings', settingsRouter.getRouter());
+app.use('/api/favorites', favoritesRouter.getRouter());
 
 app.listen(config.port, () => console.log(`Server running on port ${config.port}`))

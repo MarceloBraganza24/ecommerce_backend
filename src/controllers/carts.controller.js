@@ -162,10 +162,6 @@ const removeProductFromCart = async (req, res) => {
         const { user_id, product_id } = req.params;
         const { selectedVariant } = req.body;
 
-        // console.log("=== Eliminando producto del carrito ===");
-        // console.log("Producto ID recibido:", product_id);
-        // console.log("Variante recibida:", selectedVariant);
-
         const normalizeVariantCampos = (campos = {}) => {
             const result = {};
             for (const [key, val] of Object.entries(campos)) {
@@ -200,29 +196,12 @@ const removeProductFromCart = async (req, res) => {
 
         const originalLength = cart.products.length;
 
-        /* cart.products = cart.products.filter(p => {
+        cart.products = cart.products.filter(p => {
             const matches =
                 p.product._id?.toString() === product_id &&
                 variantsAreEqual(p.selectedVariant, selectedVariant);
-
-            if (!matches) {
-                console.log("⛔ No coincide con:", {
-                    product: p.product,
-                    selectedVariant: p.selectedVariant,
-                });
-
-                console.log("🧪 Comparando:");
-                console.log("Product ID en carrito:", p.product._id?.toString());
-                console.log("Product ID recibido:", product_id);
-                console.log("Campos carrito:", normalizeVariantCampos(p.selectedVariant?.campos || {}));
-                console.log("Campos recibidos:", normalizeVariantCampos(selectedVariant?.campos || {}));
-            }
-
             return !matches;
         });
-
-        console.log("🧾 Productos restantes en el carrito:", cart.products.length);
-        console.log("🧾 Cart ID:", cart._id.toString()); */
 
         if (cart.products.length === originalLength) {
             return res.status(404).json({ message: "Producto no encontrado en el carrito" });
