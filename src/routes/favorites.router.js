@@ -1,11 +1,13 @@
 import Router from "./router.js";
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
-import { getById, save,eliminate} from '../controllers/favorites.controller.js';
+import { getById, getByUserId,addProduct,removeProduct} from '../controllers/favorites.controller.js';
 
 export default class FavoritesRouter extends Router {
     init() {
-        this.get('/:userId', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getById);
-        this.post('/:userId', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, save);
-        this.delete('/:userId/:productId', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, eliminate);
+        this.get('/:fid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getById);
+        this.get('/user/:uid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getByUserId);
+        this.post('/add', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, addProduct);
+        this.post('/remove', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, removeProduct);
+
     }
 }

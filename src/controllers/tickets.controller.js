@@ -312,7 +312,7 @@ const updateRestoreProduct = async (req, res) => {
     try {
         const { tid } = req.params;
         const updatedTicket = await ticketsService.updateRestoreProduct(tid)
-        res.status(200).json({ message: 'Ticket eliminado (soft delete)', product: updatedTicket });
+        res.status(200).json({ message: 'Ticket restaurado (soft delete)', product: updatedTicket });
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);

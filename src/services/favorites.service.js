@@ -1,5 +1,5 @@
-import FavoritesRepository from '../repository/favorites.repository.js';
-import FavoritesManager from '../dao/managers/favoritesManager.js';
+import FavoritesRepository from '../repositories/favorites.repository.js';
+import FavoritesManager from '../dao/dbManagers/favorites.manager.js';
 
 const favoritesRepository = new FavoritesRepository(new FavoritesManager());
 
@@ -22,7 +22,8 @@ const addProduct = async (userId, productId) => {
     }
 
     // Si ya está agregado, no lo dupliques
-    if (favorite.products.includes(productId)) {
+    const alreadyExists = favorite.products.some(p => p.toString() === productId.toString());
+    if (alreadyExists) {
         return favorite;
     }
 
@@ -31,10 +32,14 @@ const addProduct = async (userId, productId) => {
     const updated = await favoritesRepository.update(favorite._id, { products: favorite.products });
     return updated;
 };
+const removeProduct = async (userId, productId) => {
+    return await favoritesRepository.removeProduct(userId, productId);
+};
 
-export default {
+export {
     getById,
     getByUserId,
+    addProduct,
     create,
-    addProduct
+    removeProduct
 };
