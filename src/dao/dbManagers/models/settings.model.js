@@ -64,6 +64,10 @@ const settingsSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    copyrightText: {
+        type: String,
+        default: ''
+    },
     socialNetworks: {
         type: [{
             name: { type: String, required: true },   // Nombre de la red (ej: "Facebook")

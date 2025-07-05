@@ -8,8 +8,8 @@ export default class Users {
         const users = await usersModel.find().lean();
         return users;
     }
-    getAdmins = async() => {
-        const users = await usersModel.find({ role: 'admin' }).lean();
+    getAdmins = async () => {
+        const users = await usersModel.find({ role: { $in: ['admin', 'premium'] } }).lean();
         return users;
     }
     getById = async(id) => {

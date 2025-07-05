@@ -5,11 +5,18 @@ export default class SettingsManager {
         return await settingsModel.findOne();
     }
     async updateConfig(data) {
-        let config = await settingsModel.findOne();
+        const config = await settingsModel.findOne();
+
         if (!config) {
             return await settingsModel.create(data);
         }
-        Object.assign(config, data);
-        return await config.save();
+
+        const updated = await settingsModel.findOneAndUpdate(
+            { _id: config._id },
+            { $set: data },
+            { new: true } // Devuelve el documento actualizado
+        );
+
+        return updated;
     }
 }

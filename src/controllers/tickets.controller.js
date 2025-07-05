@@ -12,37 +12,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const getAllByPage = async (req, res) => {
-    try {
-        const { page = 1, limit = 20, search = "", field = "" } = req.query;
-
-        let query = {};
-        if (search) {
-            if (field === 'title') {
-                query['items.snapshot.title'] = { $regex: search, $options: 'i' };
-            } else if (field === 'all') {
-                query = {
-                    $or: [
-                        { 'items.snapshot.title': { $regex: search, $options: 'i' } },
-                        { code: { $regex: search, $options: 'i' } },
-                        { payer_email: { $regex: search, $options: 'i' } },
-                        { user_role: { $regex: search, $options: 'i' } },
-                        { amount: isNaN(search) ? undefined : Number(search) },
-                    ].filter(Boolean) // elimina los undefined
-                };
-            } else if (['amount'].includes(field)) {
-                query[field] = isNaN(search) ? undefined : Number(search);
-            } else {
-                query[field] = { $regex: search, $options: "i" };
-            }
-        }
-        const tickets = await ticketsService.getAllByPage(query, { page, limit });
-        res.sendSuccess(tickets);
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}; */
 const getAllByPage = async (req, res) => {
     try {
         const { page = 1, limit = 20, search = "", field = "", selectedDate } = req.query;
@@ -70,12 +39,7 @@ const getAllByPage = async (req, res) => {
             }
         }
 
-        // 📆 Filtrado por fecha (día completo)
         if (selectedDate) {
-            /* const date = new Date(selectedDate);
-            const start = new Date(date.setHours(0, 0, 0, 0));
-            const end = new Date(date.setHours(23, 59, 59, 999));
-            query.purchase_datetime = { $gte: start, $lte: end }; */
             const date = new Date(selectedDate);
             const start = new Date(date);
             start.setHours(0, 0, 0, 0);
@@ -84,9 +48,6 @@ const getAllByPage = async (req, res) => {
             end.setHours(23, 59, 59, 999);
 
             query.purchase_datetime = { $gte: start, $lte: end };
-            // console.log("selectedDate:", selectedDate);
-            // console.log("start:", start.toISOString());
-            // console.log("end:", end.toISOString());
         }
         const tickets = await ticketsService.getAllByPage(query, { page, limit });
         res.sendSuccess(tickets);
