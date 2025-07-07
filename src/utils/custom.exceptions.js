@@ -4,6 +4,12 @@ export class UserAlreadyExists extends Error {
         this.name = this.constructor.name;
     }
 }
+export class EmailNotExists extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
 export class UserByEmailExists extends Error {
     constructor(message) {
         super(message);

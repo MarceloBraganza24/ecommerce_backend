@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async(email) => {
     await transporter.sendMail({
-        from: `"Marcelo Braganza" <${config.userNodemailer}>`,
+        from: `<${config.userNodemailer}>`,
         to: email.to,
         subject: email.subject,
         html: email.html

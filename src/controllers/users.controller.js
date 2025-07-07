@@ -1,6 +1,7 @@
 import config from '../config/config.js';
 import * as usersService from '../services/users.service.js';
-import { InvalidCredentials, ExpiredToken, UserAlreadyExists, UserByEmailExists } from "../utils/custom.exceptions.js";
+import * as settingsService from '../services/settings.service.js';
+import { InvalidCredentials, ExpiredToken, UserAlreadyExists, UserByEmailExists,EmailNotExists } from "../utils/custom.exceptions.js";
 import { __mainDirname } from '../utils/utils.js';
 import jwt from 'jsonwebtoken';
 
@@ -62,34 +63,55 @@ const finalizePurchase = async (req, res) => {
 const mailToResetPass = async (req, res) => {
     try {
         const {email} = req.body;
-        const user = await usersService.getByEmail(email);
-        const accessToken = await usersService.sendMailToResetPass(user);
+        const user = await usersService.getByEmail(email); 
+        if (!user) {
+            throw new EmailNotExists('El email no está registrado todavía, registrate ahora mismo!');
+        }
+        const config = await settingsService.getConfig();
+        const storeName = config.storeName;
+        const accessToken = await usersService.sendMailToResetPass(email,storeName);
+        res.cookie('EmailTokenJWT', accessToken, {
+            httpOnly: true,       // Oculta cookie al frontend (más seguro)
+            secure: false,        // IMPORTANTE: en desarrollo no debe estar en true
+            sameSite: 'Lax',
+            maxAge: 60 * 60 * 1000,
+            path: '/',
+        });
         res.sendSuccess(accessToken);
     } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}
-const resetPass = async (req, res) => {
-    try {
-        const cookie = req.query.cookie;
-        const pass = req.query.password;
-        const userVerified = jwt.verify(cookie, config.privateKeyJWT);
-        if(!userVerified) {
-            throw new ExpiredToken('no token provide');
-        } else {
-            const userByEmail = await usersService.getByEmail(userVerified.user.email);
-            const userUpdated = await usersService.changePass(pass, userByEmail);
-            return res.sendSuccess(userUpdated);
-        }
-    } catch (error) {
-        if(error instanceof InvalidCredentials || error instanceof ExpiredToken) {
+        if (error instanceof EmailNotExists) {
             return res.sendClientError(error.message);
         }
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
 }
+const resetPass = async (req, res) => {
+    try {
+        const token = req.cookies.EmailTokenJWT; // 👈 tomamos la cookie
+        const pass = req.query.password;
+
+        const userVerified = jwt.verify(token, config.privateKeyJWT);
+        if (!userVerified) {
+            throw new ExpiredToken('no token provide');
+        }
+
+        const userByEmail = await usersService.getByEmail(userVerified.user.email);
+        const userUpdated = await usersService.changePass(pass, userByEmail);
+
+        // Limpiamos la cookie luego del cambio
+        res.clearCookie('EmailTokenJWT');
+
+        return res.sendSuccess(userUpdated);
+    } catch (error) {
+        if (error instanceof InvalidCredentials || error instanceof ExpiredToken) {
+            return res.sendClientError(error.message);
+        }
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
+
 const changeRole = async (req, res) => {
     try {
         const { uid } = req.params;

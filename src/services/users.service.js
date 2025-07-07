@@ -33,13 +33,13 @@ const getCurrent = async(user) => {
     const current = await usersRepository.getCurrent(user);
     return current;
 }
-const sendMailToResetPass = async(user) => {
-    const userToken = {
-        email: user.email
+const sendMailToResetPass = async(email,storeName) => {
+    const user = {
+        email
     }
-    const accessToken = generateToken(userToken);
+    const accessToken = generateToken(user);
     const emailToResetPass = {
-        to: user.email,
+        to: email,
         subject: 'Link para generar nueva contraseña',
         html: `<!DOCTYPE html>
         <html lang="en">
@@ -49,9 +49,10 @@ const sendMailToResetPass = async(user) => {
             <title>Document</title>
         </head>
         <body>
-            <h1>Recuperación de contraseña</h1>
+            <h1>${storeName}</h1>
+            <h2>Recuperación de contraseña</h2>
             <h2>Accede al siguiente link para ingresar la nueva contraseña</h2>
-            <a href="https://google.com">¡has click aquí!</a>
+            <a href="http://localhost:5173/resetPass">¡has click aquí!</a>
         </body>
         </html>`
     }

@@ -83,11 +83,21 @@ const current = async(req,res) =>{
         req.logger.error(error.message);
     }
 }
+const emailUsercookie = async(req,res) =>{
+    try {
+        const token = req.cookies.EmailTokenJWT;
+        return res.sendSuccess(token)
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+}
 
 export {
     signIn,
     signInAdmin,
     login,
     logout,
+    emailUsercookie,
     current
 }
