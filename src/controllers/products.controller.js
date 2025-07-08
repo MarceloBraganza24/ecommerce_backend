@@ -35,6 +35,18 @@ const getAllBy = async (req, res) => {
         req.logger.error(error.message);
     }
 };
+const getAvailableFilters = async (req, res) => {
+    try {
+        const { category } = req.query;
+
+        if (!category) return res.sendUserError("Falta categoría");
+
+        const filters = await productsService.getAvailableFiltersByCategory(category);
+        res.sendSuccess(filters);
+    } catch (error) {
+        res.sendServerError(error.message);
+    }
+};
 const groupedByCategory = async (req, res) => {
     try {
         const limit = 10;
@@ -318,5 +330,6 @@ export {
     massRestore,
     massDelete,
     groupedByCategory,
+    getAvailableFilters,
     massDeletePermanent
 }

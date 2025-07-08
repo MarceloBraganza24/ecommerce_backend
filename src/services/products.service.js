@@ -41,7 +41,7 @@ const groupedByCategory = async(limit) => {
     const products = await productsRepository.groupedByCategory(limit);
     return products;
 }
-const getAllBy = async (filters, page, limit) => {
+/* const getAllBy = async (filters, page, limit) => {
     const { minPrice, maxPrice, sort, ...rest } = filters;
     const query = {};
     // Agregamos filtros como category, title, etc.
@@ -63,6 +63,121 @@ const getAllBy = async (filters, page, limit) => {
     const result = await productsRepository.getAllBy(query, { page, limit, sort: sortOption });
 
     return result;
+}; */
+const getAvailableFiltersByCategory = async (category) => {
+    const query = { deleted: false, category };
+    const allProducts = await productsRepository.getAllByRaw(query);
+    return extractAvailableFilters(allProducts);
+};
+const getAllBy = async (filters, page, limit) => {
+    const { minPrice, maxPrice, sort, ...rest } = filters;
+
+    const baseQuery = { deleted: false };
+    const andConditions = [];
+
+    // Filtros clásicos como categoría, título, estado
+    for (const key of Object.keys(rest)) {
+        const value = rest[key];
+        if (['category', 'title', 'state'].includes(key)) {
+            andConditions.push({ [key]: { $regex: value, $options: 'i' } });
+        }
+    }
+
+    // Filtros dinámicos (camposExtras y variantes.campos)
+    const dynamicQueryOR = [];
+
+    for (const key of Object.keys(rest)) {
+        const value = rest[key];
+
+        // Saltar los filtros clásicos
+        if (['category', 'title', 'state'].includes(key)) continue;
+
+        // 🔍 Si el valor es un array (ej: talle: ['38', '40'])
+        if (Array.isArray(value)) {
+            dynamicQueryOR.push({ [`camposExtras.${key}`]: { $in: value } });
+            dynamicQueryOR.push({ [`variantes.campos.${key}`]: { $in: value } });
+        } else {
+            // 🔍 Si es string único (ej: Material: 'cargo')
+            dynamicQueryOR.push({ [`camposExtras.${key}`]: value });
+            dynamicQueryOR.push({ [`variantes.campos.${key}`]: value });
+        }
+    }
+
+    if (dynamicQueryOR.length > 0) {
+        andConditions.push({ $or: dynamicQueryOR });
+    }
+
+    // Rango de precios
+    if (minPrice && maxPrice) {
+        const min = Number(minPrice);
+        const max = Number(maxPrice);
+
+        andConditions.push({
+            $or: [
+                { price: { $gte: min, $lte: max } }, // Siempre que tenga price
+                {
+                variantes: {
+                    $elemMatch: {
+                    price: { $gte: min, $lte: max }
+                    }
+                }
+                }
+            ]
+        }); 
+    }
+
+    // Componer query final
+    const finalQuery = andConditions.length > 0
+        ? { ...baseQuery, $and: andConditions }
+        : baseQuery;
+
+    const sortOption = sort === "asc" ? { price: 1 }
+                     : sort === "desc" ? { price: -1 }
+                     : {};
+
+    // 🔍 Para extraer filtros dinámicos actuales (aunque estén paginados)
+    const allFiltered = await productsRepository.getAllByRaw(finalQuery);
+    const availableFilters = extractAvailableFilters(allFiltered);
+
+    // Paginado
+    const paginatedResult = await productsRepository.getAllBy(finalQuery, { page, limit, sort: sortOption });
+
+    return {
+        ...paginatedResult,
+        availableFilters
+    };
+};
+
+const extractAvailableFilters = (products) => {
+    const filters = {};
+
+    products.forEach(product => {
+        // camposExtras
+        if (product.camposExtras) {
+            for (const [key, value] of Object.entries(product.camposExtras)) {
+                if (!filters[key]) filters[key] = new Set();
+                value.split(',').map(v => v.trim()).forEach(val => filters[key].add(val));
+            }
+        }
+
+        // variantes.campos
+        product.variantes?.forEach(variant => {
+            if (variant.campos) {
+                for (const [key, value] of Object.entries(variant.campos)) {
+                    if (!filters[key]) filters[key] = new Set();
+                    filters[key].add(value);
+                }
+            }
+        });
+    });
+
+    // Convertir sets a arrays
+    const finalFilters = {};
+    for (const [key, set] of Object.entries(filters)) {
+        finalFilters[key] = Array.from(set);
+    }
+
+    return finalFilters;
 };
 const getIdsByTitle = async (title) => {
     // Llamamos a un repositorio para obtener los productos que coinciden con el título
@@ -167,6 +282,7 @@ export {
     updateSoftDelete,
     getDeleted,
     getAllByPage,
+    getAvailableFiltersByCategory,
     groupedByCategory,
     getAllBy,
     getIdsByTitle,

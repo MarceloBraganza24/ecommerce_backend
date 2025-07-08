@@ -66,6 +66,10 @@ export default class Products {
         });
         return result;
     };
+    getAllByRaw = async (query = {}) => {
+        const fullQuery = { ...query, deleted: false };
+        return await productsModel.find(fullQuery).lean(); // Lean = objetos simples
+    };
     getAllByPage = async (query = {}, { page, limit }) => {
         const fullQuery = { ...query, deleted: false };
 

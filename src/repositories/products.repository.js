@@ -39,6 +39,9 @@ export default class ProductsRepository {
     getAllBy = async (query, { page, limit, sort }) => {
         return await this.dao.getAllBy(query, { page, limit, sort });
     };
+    getAllByRaw = async (query) => {
+        return await this.dao.getAllByRaw(query);
+    };
     getIdsByTitle = async(title) => {
         const products = await this.dao.getIdsByTitle(title);
         return products;
