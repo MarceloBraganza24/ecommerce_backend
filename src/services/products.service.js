@@ -41,29 +41,6 @@ const groupedByCategory = async(limit) => {
     const products = await productsRepository.groupedByCategory(limit);
     return products;
 }
-/* const getAllBy = async (filters, page, limit) => {
-    const { minPrice, maxPrice, sort, ...rest } = filters;
-    const query = {};
-    // Agregamos filtros como category, title, etc.
-    Object.keys(rest).forEach((key) => {
-        query[key] = { $regex: rest[key], $options: "i" };
-    });
-    // Filtro por rango de precios
-    if (minPrice && maxPrice) {
-        query.price = {
-            $gte: Number(minPrice),
-            $lte: Number(maxPrice)
-        };
-    }
-    // Ordenamiento
-    const sortOption = sort === "asc" ? { price: 1 } :
-                       sort === "desc" ? { price: -1 } :
-                       {}; // sin orden
-
-    const result = await productsRepository.getAllBy(query, { page, limit, sort: sortOption });
-
-    return result;
-}; */
 const getAvailableFiltersByCategory = async (category) => {
     const query = { deleted: false, category };
     const allProducts = await productsRepository.getAllByRaw(query);
@@ -151,34 +128,28 @@ const getAllBy = async (filters, page, limit) => {
 const extractAvailableFilters = (products) => {
     const filters = {};
 
-    products.forEach(product => {
-        // camposExtras
-        if (product.camposExtras) {
-            for (const [key, value] of Object.entries(product.camposExtras)) {
-                if (!filters[key]) filters[key] = new Set();
-                value.split(',').map(v => v.trim()).forEach(val => filters[key].add(val));
-            }
-        }
+    for (const product of products) {
+        // Tomamos tanto los camposExtras como los campos de las variantes
+        const campos = product.camposExtras || {};
 
-        // variantes.campos
-        product.variantes?.forEach(variant => {
-            if (variant.campos) {
-                for (const [key, value] of Object.entries(variant.campos)) {
-                    if (!filters[key]) filters[key] = new Set();
-                    filters[key].add(value);
+        for (const [key, valuesString] of Object.entries(campos)) {
+            const values = valuesString.split(',').map(v => v.trim());
+
+            for (const value of values) {
+                // Si ese campo y valor están presentes en alguna variante del producto, lo contamos
+                const hasAtLeastOneMatchingVariant = (product.variantes || []).some(v => v.campos?.[key] === value);
+
+                if (hasAtLeastOneMatchingVariant) {
+                    if (!filters[key]) filters[key] = {};
+                    filters[key][value] = (filters[key][value] || 0) + 1;
                 }
             }
-        });
-    });
-
-    // Convertir sets a arrays
-    const finalFilters = {};
-    for (const [key, set] of Object.entries(filters)) {
-        finalFilters[key] = Array.from(set);
+        }
     }
 
-    return finalFilters;
+    return filters;
 };
+
 const getIdsByTitle = async (title) => {
     // Llamamos a un repositorio para obtener los productos que coinciden con el título
     const products = await productsRepository.getIdsByTitle(title);
@@ -207,10 +178,6 @@ const decreaseVariantStock = async (productId, camposSeleccionados, quantity, se
     const product = await productsRepository.getById(productId, session);
     if (!product) throw new Error('Producto no encontrado');
 
-    // console.log('🧪 Buscando variante para:', product.title);
-    // console.log('Campos seleccionados:', camposSeleccionados);
-    // console.log('Variantes del producto:', product.variantes.map(v => v.campos));
-
     const varianteIndex = product.variantes.findIndex(v =>
         Object.entries(camposSeleccionados).every(
             ([key, val]) => {
@@ -219,12 +186,6 @@ const decreaseVariantStock = async (productId, camposSeleccionados, quantity, se
             }
         )
     );
-
-    /* const varianteIndex = product.variantes.findIndex(v =>
-        Object.entries(camposSeleccionados).every(
-            ([key, val]) => v.campos?.[key] === val
-        )
-    ); */
 
     if (varianteIndex === -1) {
         throw new Error(`Variante no encontrada para el producto ${product.title}`);
@@ -236,11 +197,7 @@ const decreaseVariantStock = async (productId, camposSeleccionados, quantity, se
         throw new Error(`Stock insuficiente para la variante de ${product.title}`);
     }
 
-    // Descontar el stock de la variante
-    //product.variantes[varianteIndex].stock -= quantity;
-    //console.log('Stock antes:', product.variantes[varianteIndex].stock);
     product.variantes[varianteIndex].stock -= quantity;
-    //console.log('Stock después:', product.variantes[varianteIndex].stock);
 
     await productsRepository.update(productId, product, session);
 };
