@@ -8,6 +8,10 @@ export default class TicketsRepository {
         const tickets = await this.dao.getAll();
         return tickets;
     }
+    countAllTickets = async() => {
+        const quantityTickets = await this.dao.countAllTickets();
+        return quantityTickets;
+    }
     getAllByPage = async(query, { page, limit }) => {
         const tickets = await this.dao.getAllByPage(query, { page, limit });
         return tickets;

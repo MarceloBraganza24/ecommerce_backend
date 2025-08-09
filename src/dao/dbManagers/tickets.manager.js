@@ -10,6 +10,10 @@ export default class TicketsDao {
         if (session) query.session(session);
         return await query.lean();
     }
+    countAllTickets = async () => {
+        const quantityTickets = await ticketsModel.countDocuments({ deleted: false });
+        return quantityTickets; 
+    }
     getDeleted = async () => {
         const deletedTickets = await ticketsModel.find({ deleted: true }).lean();
         return deletedTickets;

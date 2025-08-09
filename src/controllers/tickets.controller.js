@@ -49,8 +49,22 @@ const getAllByPage = async (req, res) => {
 
             query.purchase_datetime = { $gte: start, $lte: end };
         }
-        const tickets = await ticketsService.getAllByPage(query, { page, limit });
-        res.sendSuccess(tickets);
+        // const tickets = await ticketsService.getAllByPage(query, { page, limit });
+        // res.sendSuccess(tickets);
+
+
+
+        const options = {
+            page: Number(page),
+            limit: Number(limit),
+        };
+
+        const [paginatedResult, totalTickets] = await Promise.all([
+            ticketsService.getAllByPage(query, options),
+            ticketsService.countAllTickets()
+        ]);
+
+        res.sendSuccess({ ...paginatedResult, totalTickets });
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);

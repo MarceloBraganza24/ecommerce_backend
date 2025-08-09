@@ -10,6 +10,10 @@ const getAllByPage = async(query, { page, limit }) => {
     const tickets = await ticketsManager.getAllByPage(query, { page, limit });
     return tickets;
 }
+const countAllTickets = async() => {
+    const quantityTickets = await ticketsManager.countAllTickets();
+    return quantityTickets;
+}
 const getAllByPageAndEmail = async(query, { page, limit }) => {
     const tickets = await ticketsManager.getAllByPageAndEmail(query, { page, limit });
     return tickets;
@@ -67,6 +71,7 @@ export {
     save,
     eliminate,
     update,
+    countAllTickets,
     getAllByPageAndEmail,
     getAllByPage,
     updateSoftDelete,
