@@ -59,28 +59,6 @@ const refreshToken = async (req, res) => {
         res.sendServerError('Error al renovar el token');
     }
 };
-/* const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const last_connection = new Date();
-        if( !email || !password) return res.sendClientError('incomplete values');
-        const accessToken = await usersService.login(password, email,last_connection);
-        res.cookie('TokenJWT', accessToken, {
-            httpOnly: true,       // Oculta cookie al frontend (más seguro)
-            secure: false,        // IMPORTANTE: en desarrollo no debe estar en true
-            sameSite: 'Lax',
-            maxAge: 60 * 60 * 1000,
-            path: '/',
-        });
-        res.sendSuccess(accessToken);
-    } catch (error) {
-        if(error instanceof InvalidCredentials) {
-            return res.sendClientError(error.message);
-        }
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-} */
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -96,24 +74,6 @@ const login = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-/* const logout = async (req, res) => {
-    try {
-        const token = req.cookies.TokenJWT;
-        const last_connection = new Date();
-        const userVerified = jwt.verify(token, config.privateKeyJWT);
-        const userUpdated = await usersService.logOut(userVerified.user,last_connection)
-        res.clearCookie('TokenJWT', {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'Lax',
-            path: '/',
-        });
-        res.sendSuccess({ userUpdated: userUpdated });
-    } catch (error) {
-        req.logger?.error(error.message);
-        res.sendServerError('Error al cerrar sesión');
-    }
-}; */
 const logout = async (req, res) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -136,41 +96,20 @@ const logout = async (req, res) => {
             return res.status(400).json({ status: 'error', error: 'Invalid token payload' });
         }
 
-        const userUpdated = await usersService.logOut(user, last_connection);
+        await usersService.logOut(user, last_connection);
 
-        res.sendSuccess({ userUpdated });
+        res.sendSuccess({ message: 'Logout realizado correctamente' });
     } catch (error) {
         req.logger?.error(error.message);
         res.sendServerError('Error al cerrar sesión');
     }
 };
-/* const current = async(req,res) =>{
-    try {
-        const token = req.cookies.TokenJWT;
-        const userVerified = jwt.verify(token, config.privateKeyJWT);
-        const userByEmail = await usersService.getByEmail(userVerified.user.email);
-        const user = await usersService.getCurrent(userByEmail);
-        if(user)return res.sendSuccess(user)
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-} */
 const current = async(req,res) =>{
     try {
         const userFromToken = req.user; // lo inyectó el middleware
         const userByEmail = await usersService.getByEmail(userFromToken.email);
         const user = await usersService.getCurrent(userByEmail);
         if (user) return res.sendSuccess(user);
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}
-const emailUsercookie = async(req,res) =>{
-    try {
-        const token = req.cookies.EmailTokenJWT;
-        return res.sendSuccess(token)
     } catch (error) {
         res.sendServerError(error.message);
         req.logger.error(error.message);
@@ -183,6 +122,5 @@ export {
     signInAdmin,
     login,
     logout,
-    emailUsercookie,
     current
 }
