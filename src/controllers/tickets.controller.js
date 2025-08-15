@@ -39,12 +39,22 @@ const getAllByPage = async (req, res) => {
             }
         }
 
-        if (selectedDate) {
+        /* if (selectedDate) {
             const date = new Date(selectedDate);
             const start = new Date(date);
             start.setHours(0, 0, 0, 0);
 
             const end = new Date(date);
+            end.setHours(23, 59, 59, 999);
+
+            query.purchase_datetime = { $gte: start, $lte: end };
+        } */
+        if (selectedDate) {
+            const [year, month, day] = selectedDate.split('-');
+            const start = new Date(year, month - 1, day);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(year, month - 1, day);
             end.setHours(23, 59, 59, 999);
 
             query.purchase_datetime = { $gte: start, $lte: end };
