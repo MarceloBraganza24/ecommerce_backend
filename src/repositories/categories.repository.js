@@ -10,8 +10,8 @@ export default class CategoriesRepository {
         const category = await this.dao.getById(cid);
         return category;
     }
-    save = async(name, category_datetime) => {
-        const categorySaved = await this.dao.save(name, category_datetime);
+    save = async(name, category_datetime,parent) => {
+        const categorySaved = await this.dao.save(name, category_datetime,parent);
         return categorySaved;
     }
     eliminate = async(cid) => {

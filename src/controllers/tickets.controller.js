@@ -39,17 +39,7 @@ const getAllByPage = async (req, res) => {
             }
         }
 
-        /* if (selectedDate) {
-            const date = new Date(selectedDate);
-            const start = new Date(date);
-            start.setHours(0, 0, 0, 0);
-
-            const end = new Date(date);
-            end.setHours(23, 59, 59, 999);
-
-            query.purchase_datetime = { $gte: start, $lte: end };
-        } */
-        if (selectedDate) {
+        if (selectedDate && !search) {
             const [year, month, day] = selectedDate.split('-');
             const start = new Date(year, month - 1, day);
             start.setHours(0, 0, 0, 0);
@@ -59,10 +49,6 @@ const getAllByPage = async (req, res) => {
 
             query.purchase_datetime = { $gte: start, $lte: end };
         }
-        // const tickets = await ticketsService.getAllByPage(query, { page, limit });
-        // res.sendSuccess(tickets);
-
-
 
         const options = {
             page: Number(page),
@@ -71,7 +57,7 @@ const getAllByPage = async (req, res) => {
 
         const [paginatedResult, totalTickets] = await Promise.all([
             ticketsService.getAllByPage(query, options),
-            ticketsService.countAllTickets()
+            ticketsService.countAllTickets(query) // <-- pasamos el mismo query
         ]);
 
         res.sendSuccess({ ...paginatedResult, totalTickets });
@@ -303,7 +289,7 @@ const updateRestoreProduct = async (req, res) => {
         req.logger.error(error.message);
     }
 } 
-const getDeleted = async (req, res) => {
+/* const getDeleted = async (req, res) => {
     try {
         const deletedTickets = await ticketsService.getDeleted();
         res.status(200).json({ status: 'success', payload: deletedTickets });
@@ -311,7 +297,23 @@ const getDeleted = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
-} 
+}  */
+const getDeleted = async (req, res) => {
+    try {
+        const { search = "" } = req.query;
+        let query = { deleted: true };
+
+        if (search) {
+            query['items.snapshot.title'] = { $regex: search, $options: 'i' };
+        }
+
+        const deletedTickets = await ticketsService.getDeleted(query);
+        res.status(200).json({ status: 'success', payload: deletedTickets });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
 
 export {
     getAll,

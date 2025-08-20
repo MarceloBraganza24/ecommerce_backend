@@ -21,8 +21,8 @@ const updateRestoreProduct = async(pid) => {
     const productUpdated = await productsRepository.updateRestoreProduct(pid);
     return productUpdated;
 }
-const getDeleted = async() => {
-    const products = await productsRepository.getDeleted();
+const getDeleted = async(query) => {
+    const products = await productsRepository.getDeleted(query);
     return products;
 }
 const getAll = async() => {

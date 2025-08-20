@@ -16,9 +16,12 @@ export default class Products {
             : productsModel.findOne({ _id: pid });
         return await query;
     };
-    getDeleted = async () => {
+    /* getDeleted = async (query) => {
         const deletedProducts = await productsModel.find({ deleted: true }).lean();
         return deletedProducts;
+    }; */
+    getDeleted = async (query = { deleted: true }) => {
+        return await productsModel.find(query).lean();
     };
     groupedByCategory = async (limit) => {
         // Obtener las categorías distintas primero

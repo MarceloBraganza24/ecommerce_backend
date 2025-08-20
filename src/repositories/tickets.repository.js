@@ -47,8 +47,8 @@ export default class TicketsRepository {
         const ticketsEliminated = await this.dao.massRestore(ids);
         return ticketsEliminated;
     }
-    getDeleted = async() => {
-        const tickets = await this.dao.getDeleted();
+    getDeleted = async(query) => {
+        const tickets = await this.dao.getDeleted(query);
         return tickets;
     }
     updateSoftDelete = async(tid) => {

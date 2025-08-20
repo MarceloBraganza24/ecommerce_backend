@@ -10,13 +10,20 @@ export default class TicketsDao {
         if (session) query.session(session);
         return await query.lean();
     }
-    countAllTickets = async () => {
+    /* countAllTickets = async () => {
         const quantityTickets = await ticketsModel.countDocuments({ deleted: false });
         return quantityTickets; 
-    }
-    getDeleted = async () => {
+    } */
+    countAllTickets = async (query = {}) => {
+        const fullQuery = { ...query, deleted: false };
+        return await ticketsModel.countDocuments(fullQuery);
+    };
+    /* getDeleted = async () => {
         const deletedTickets = await ticketsModel.find({ deleted: true }).lean();
         return deletedTickets;
+    }; */
+    getDeleted = async (query = { deleted: true }) => {
+        return await ticketsModel.find(query).lean();
     };
     getAllByPage = async (query = {}, { page, limit }) => {
         const fullQuery = { ...query, deleted: false };

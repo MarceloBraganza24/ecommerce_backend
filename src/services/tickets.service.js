@@ -61,8 +61,8 @@ const updateRestoreProduct = async(tid) => {
     const ticketUpdated = await ticketsManager.updateRestoreProduct(tid);
     return ticketUpdated;
 }
-const getDeleted = async() => {
-    const tickets = await ticketsManager.getDeleted();
+const getDeleted = async(query) => {
+    const tickets = await ticketsManager.getDeleted(query);
     return tickets;
 }
 export {

@@ -10,7 +10,7 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 } 
-const getDeleted = async (req, res) => {
+/* const getDeleted = async (req, res) => {
     try {
         const deletedProducts = await productsService.getDeleted();
         res.status(200).json({ status: 'success', payload: deletedProducts });
@@ -18,7 +18,23 @@ const getDeleted = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
-} 
+}  */
+const getDeleted = async (req, res) => {
+    try {
+        const { search = "" } = req.query;
+        let query = { deleted: true };
+
+        if (search) {
+            query['title'] = { $regex: search, $options: 'i' };
+        }
+
+        const deletedProducts = await productsService.getDeleted(query);
+        res.status(200).json({ status: 'success', payload: deletedProducts });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
 const getAllBy = async (req, res) => {
     try {
         const { page = 1, limit = 8, sort, minPrice, maxPrice, ...filters } = req.query;

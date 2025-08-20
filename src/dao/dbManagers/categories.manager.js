@@ -9,8 +9,8 @@ export default class CategoriesDao {
         const category = await categoriesModel.findById(id).lean();
         return category;
     }
-    save = async(name, category_datetime) => {
-        const categorySaved = await categoriesModel.create({ name: name, category_datetime: category_datetime });
+    save = async(name, category_datetime,parent) => {
+        const categorySaved = await categoriesModel.create({ name: name, category_datetime: category_datetime ,parent});
         return categorySaved;
     }
     eliminate = async (cid) => {

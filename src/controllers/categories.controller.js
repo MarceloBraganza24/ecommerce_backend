@@ -20,10 +20,23 @@ const getById = async (req, res) => {
         req.logger.error(error.message);
     }
 }
-const save = async (req, res) => {
+/* const save = async (req, res) => {
     try {
         const { name, category_datetime  } = req.body;
         const category = await categoriesService.save(name, category_datetime);
+        res.sendSuccessNewResourse(category);
+    } catch (error) {
+        if(error instanceof CategoryExists) {
+            return res.sendClientError(error.message);
+        }
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+} */
+const save = async (req, res) => {
+    try {
+        const { name, category_datetime, parent } = req.body; // <-- agregamos parent
+        const category = await categoriesService.save(name, category_datetime, parent);
         res.sendSuccessNewResourse(category);
     } catch (error) {
         if(error instanceof CategoryExists) {
