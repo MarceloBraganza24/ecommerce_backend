@@ -66,6 +66,10 @@ export default class Products {
             page,
             limit,
             sort,
+            populate: {
+                path: "category",
+                select: "name parent", // 👈 podés elegir qué traer (ej: name y parent)
+            },
         });
         return result;
     };
@@ -76,7 +80,7 @@ export default class Products {
     getAllByPage = async (query = {}, { page, limit }) => {
         const fullQuery = { ...query, deleted: false };
 
-        const products = await productsModel.paginate(fullQuery, { page, limit });
+        const products = await productsModel.paginate(fullQuery, { page, limit,populate: { path: "category", select: "name parent"}, });
         return products; 
     }
     navbarSearch = async (query = {}) => {

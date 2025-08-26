@@ -15,6 +15,36 @@ export const updateConfig = async (req, res) => {
         const parsedData = JSON.parse(req.body.data); // viene como string
         const images = req.files; // multer procesa esto
 
+         // === OFFERS SLIDER ===
+        const oldOffers = parsedData.offersSlider || [];
+        const incomingOffers = parsedData.offersSlider || []; 
+        const newOfferFiles = images['offersSlider'] || [];
+
+        // Procesar nuevos uploads
+        let newOffersFromFiles = newOfferFiles.map((file, index) => ({
+            image: path.join('uploads', file.filename).replace(/\\/g, '/'),
+            link: '',  // podrías permitir que admin envíe un link
+            title: '', // idem para título
+            order: oldOffers.length + index // continúa orden
+        }));
+
+        // Actualizamos lista combinada
+        const updatedOffersSlider = [
+            ...incomingOffers.filter(o => o && o.image), // los que quedaron
+            ...newOffersFromFiles                        // los nuevos
+        ];
+
+        // Detectar eliminados (estaban antes pero no están ahora)
+        const deletedOffers = oldOffers.filter(
+            oldOffer => !updatedOffersSlider.some(o => o.image === oldOffer.image)
+        );
+
+        for (const offer of deletedOffers) {
+            if (fs.existsSync(offer.image)) {
+                fs.unlinkSync(offer.image);
+            }
+        }
+
         // === 1. SITE IMAGES ===
         const siteImageKeys = ['favicon', 'logoStore', 'homeImage', 'aboutImage', 'contactImage'];
         const updatedSiteImages = { ...parsedData.siteImages };
@@ -94,7 +124,8 @@ export const updateConfig = async (req, res) => {
             ...parsedData,
             siteImages: updatedSiteImages,
             sliderLogos: updatedSliderLogos,
-            socialNetworks: updatedSocialNetworks
+            socialNetworks: updatedSocialNetworks,
+            offersSlider: updatedOffersSlider 
         };
         const updatedConfig = await settingsService.updateConfig(newSettings);
         res.json(updatedConfig);

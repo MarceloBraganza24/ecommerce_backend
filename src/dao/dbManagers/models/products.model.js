@@ -37,7 +37,8 @@ const productsSchema = new mongoose.Schema({
         required: true
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'categories',
         required: true
     },
     number_sales: {

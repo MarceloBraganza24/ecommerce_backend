@@ -1,6 +1,6 @@
 import Router from "./router.js";
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
-import { getAll,getDeleted,navbarSearch,getAllByPage,getAllBy,getAvailableFilters, getById, save,massRestore,groupedByCategory,massDeletePermanent, update,updateSoftDelete,updateRestoreProduct,updatePricesByCategories,restorePricesByCategories, eliminate,massDelete } from '../controllers/products.controller.js'
+import { getAll,getDeleted,navbarSearch,getAllByPage,searchProducts,getAllBy,getAvailableFilters, getById, save,massRestore,groupedByCategory,massDeletePermanent, update,updateSoftDelete,updateRestoreProduct,updatePricesByCategories,restorePricesByCategories, eliminate,massDelete } from '../controllers/products.controller.js'
 import uploader from "../utils/upload.js";
 
 export default class ProductsRouter extends Router {
@@ -13,6 +13,7 @@ export default class ProductsRouter extends Router {
         this.get('/by', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAllBy);
         this.get('/availableFilters', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAvailableFilters);
         this.get('/:pid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getById);
+        this.post('/search', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, searchProducts);
         this.post('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, uploader.array('images', 6), save);
         this.post('/update-prices-category', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, updatePricesByCategories);
         this.post('/restore-prices-category', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, restorePricesByCategories);

@@ -9,6 +9,7 @@ export default class SettingsRouter extends Router {
         this.put('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, uploader.fields([
                 { name: 'favicon', maxCount: 1 },
                 { name: 'logoStore', maxCount: 1 },
+                { name: 'offersSlider', maxCount: 20 },
                 { name: 'homeImage', maxCount: 1 },
                 { name: 'aboutImage', maxCount: 1 },
                 { name: 'contactImage', maxCount: 1 },

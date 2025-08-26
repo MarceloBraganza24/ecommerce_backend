@@ -35,6 +35,27 @@ const getDeleted = async (req, res) => {
         req.logger.error(error.message);
     }
 };
+// controllers/products.controller.js
+const searchProducts = async (req, res) => {
+    try {
+        const { category, minPrice, maxPrice, filters, sort, page, limit } = req.body;
+
+        const result = await productsService.searchProducts({
+            category,
+            minPrice,
+            maxPrice,
+            filters,
+            sort,
+            page,
+            limit
+        });
+
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const getAllBy = async (req, res) => {
     try {
         const { page = 1, limit = 8, sort, minPrice, maxPrice, ...filters } = req.query;
@@ -331,6 +352,7 @@ const massRestore = async (req, res) => {
 
 export {
     getAll,
+    searchProducts,
     getDeleted,
     navbarSearch,
     getAllBy,

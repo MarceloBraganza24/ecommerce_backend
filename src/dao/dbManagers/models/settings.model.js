@@ -46,6 +46,17 @@ const settingsSchema = new mongoose.Schema({
         type: [String], // Arreglo de imagenes sliders como strings
         default: []
     },
+    offersSlider: {
+        type: [
+            {
+                image: { type: String, required: true }, // ruta al archivo
+                link: { type: String, default: '' },     // opcional: a dónde lleva la oferta
+                title: { type: String, default: '' },    // opcional: texto
+                order: { type: Number, default: 0 }      // 👈 para ordenar en el front
+            }
+        ],
+        default: []
+    },
     siteImages: {
         type: new mongoose.Schema({
             favicon: { type: String, default: '' },

@@ -1,6 +1,7 @@
 import ProductsRepository from '../repositories/products.repository.js';
 import { Products } from '../dao/factory.js';
 import { ProductExists } from '../utils/custom.exceptions.js';
+import { getCategoryAndChildrenIds } from "../utils/getCategoryAndChildren.js";
 
 const productsDao = new Products();
 const productsRepository = new ProductsRepository(productsDao);
@@ -46,16 +47,64 @@ const getAvailableFiltersByCategory = async (category) => {
     const allProducts = await productsRepository.getAllByRaw(query);
     return extractAvailableFilters(allProducts);
 };
+// services/products.service.js
+/* const searchProducts = async ({ category, minPrice, maxPrice, filters, sort, page, limit }) => {
+    let query = {};
+
+    if (category) query.category = category;
+    if (minPrice || maxPrice) query.price = {};
+    if (minPrice) query.price.$gte = minPrice;
+    if (maxPrice) query.price.$lte = maxPrice;
+
+    // Filtros dinámicos: buscan tanto en camposExtras como en variantes.campos
+    if (filters && Object.keys(filters).length > 0) {
+        const dynamicFilters = Object.entries(filters).map(([key, values]) => ({
+            $or: [
+                { [`camposExtras.${key}`]: { $in: values } },
+                { [`variantes.campos.${key}`]: { $in: values } }
+            ]
+        }));
+        query.$and = dynamicFilters;
+    }
+
+    const options = {
+        page: page || 1,
+        limit: limit || 8,
+        sort: sort === "asc" ? { price: 1 } : sort === "desc" ? { price: -1 } : {}
+    };
+
+    //return await productsModel.paginate(query, options);
+    // Paginado
+    const paginatedResult = await productsRepository.getAllBy(query, options);
+
+    return {
+        ...paginatedResult
+    };
+}; */
+const searchProducts = async ({ category, minPrice, maxPrice, filters, sort, page, limit }) => {
+    return await getAllBy(
+        { category, minPrice, maxPrice, ...filters, sort },
+        page,
+        limit
+    );
+};
+
 const getAllBy = async (filters, page, limit) => {
-    const { minPrice, maxPrice, sort, ...rest } = filters;
+    const { minPrice, maxPrice, sort, category, ...rest } = filters;
 
     const baseQuery = { deleted: false };
     const andConditions = [];
 
+    // 📌 Filtro por categoría (con subcategorías)
+    if (category) {
+        const allCategoryIds = await getCategoryAndChildrenIds(category);
+        andConditions.push({ category: { $in: allCategoryIds } });
+    }
+
     // Filtros clásicos como categoría, título, estado
     for (const key of Object.keys(rest)) {
         const value = rest[key];
-        if (['category', 'title', 'state'].includes(key)) {
+        if (['title', 'state'].includes(key)) {
             andConditions.push({ [key]: { $regex: value, $options: 'i' } });
         }
     }
@@ -67,7 +116,7 @@ const getAllBy = async (filters, page, limit) => {
         const value = rest[key];
 
         // Saltar los filtros clásicos
-        if (['category', 'title', 'state'].includes(key)) continue;
+        if (['title', 'state'].includes(key)) continue;
 
         // 🔍 Si el valor es un array (ej: talle: ['38', '40'])
         if (Array.isArray(value)) {
@@ -125,7 +174,7 @@ const getAllBy = async (filters, page, limit) => {
     };
 };
 
-const extractAvailableFilters = (products) => {
+/* const extractAvailableFilters = (products) => {
     const filters = {};
 
     for (const product of products) {
@@ -148,7 +197,90 @@ const extractAvailableFilters = (products) => {
     }
 
     return filters;
+}; */
+/* const extractAvailableFilters = (products) => {
+    const filters = {};
+
+    for (const product of products) {
+        // 🔹 Contar camposExtras
+        if (product.camposExtras) {
+            for (const [key, value] of Object.entries(product.camposExtras)) {
+                if (!filters[key]) filters[key] = {};
+                const values = value.split(","); // puede venir separado por coma
+                for (const v of values) {
+                    const val = v.trim();
+                    filters[key][val] = (filters[key][val] || 0) + 1;
+                }
+            }
+        }
+
+        // 🔹 Contar variantes.campos
+        if (product.variantes && Array.isArray(product.variantes)) {
+            for (const variante of product.variantes) {
+                if (variante.campos) {
+                    for (const [key, value] of Object.entries(variante.campos)) {
+                        if (!filters[key]) filters[key] = {};
+                        const values = value.split(",");
+                        for (const v of values) {
+                            const val = v.trim();
+                            filters[key][val] = (filters[key][val] || 0) + 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return filters;
+}; */
+const extractAvailableFilters = (products) => {
+    const filters = {};
+
+    for (const product of products) {
+        const countedKeys = new Set(); // para evitar duplicados por producto
+
+        // CamposExtras
+        if (product.camposExtras) {
+            for (const [key, value] of Object.entries(product.camposExtras)) {
+                const values = value.split(",").map(v => v.trim());
+                for (const val of values) {
+                    if (!filters[key]) filters[key] = {};
+                    // solo contar 1 vez por producto
+                    if (!filters[key][val]) filters[key][val] = 0;
+                    const uniqueKey = `${product._id}_${key}_${val}`;
+                    if (!countedKeys.has(uniqueKey)) {
+                        filters[key][val] += 1;
+                        countedKeys.add(uniqueKey);
+                    }
+                }
+            }
+        }
+
+        // Variantes
+        if (product.variantes && Array.isArray(product.variantes)) {
+            for (const variante of product.variantes) {
+                if (variante.campos) {
+                    for (const [key, value] of Object.entries(variante.campos)) {
+                        const values = value.split(",").map(v => v.trim());
+                        for (const val of values) {
+                            if (!filters[key]) filters[key] = {};
+                            if (!filters[key][val]) filters[key][val] = 0;
+                            const uniqueKey = `${product._id}_${key}_${val}`;
+                            if (!countedKeys.has(uniqueKey)) {
+                                filters[key][val] += 1;
+                                countedKeys.add(uniqueKey);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return filters;
 };
+
+
 
 const getIdsByTitle = async (title) => {
     // Llamamos a un repositorio para obtener los productos que coinciden con el título
@@ -239,6 +371,7 @@ export {
     updateSoftDelete,
     getDeleted,
     getAllByPage,
+    searchProducts,
     getAvailableFiltersByCategory,
     groupedByCategory,
     getAllBy,
