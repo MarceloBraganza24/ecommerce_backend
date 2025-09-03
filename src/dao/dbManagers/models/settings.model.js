@@ -49,10 +49,12 @@ const settingsSchema = new mongoose.Schema({
     offersSlider: {
         type: [
             {
-                image: { type: String, required: true }, // ruta al archivo
-                link: { type: String, default: '' },     // opcional: a dónde lleva la oferta
-                title: { type: String, default: '' },    // opcional: texto
-                order: { type: Number, default: 0 }      // 👈 para ordenar en el front
+            image: { type: String, required: true }, 
+            filters: {
+                type: Map,
+                of: mongoose.Schema.Types.Mixed, // ✅ permite strings u objetos
+                required: true
+            }
             }
         ],
         default: []

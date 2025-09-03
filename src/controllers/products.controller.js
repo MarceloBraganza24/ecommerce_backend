@@ -10,15 +10,6 @@ const getAll = async (req, res) => {
         req.logger.error(error.message);
     }
 } 
-/* const getDeleted = async (req, res) => {
-    try {
-        const deletedProducts = await productsService.getDeleted();
-        res.status(200).json({ status: 'success', payload: deletedProducts });
-    } catch (error) {
-        res.sendServerError(error.message);
-        req.logger.error(error.message);
-    }
-}  */
 const getDeleted = async (req, res) => {
     try {
         const { search = "" } = req.query;
@@ -35,10 +26,11 @@ const getDeleted = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-// controllers/products.controller.js
 const searchProducts = async (req, res) => {
     try {
         const { category, minPrice, maxPrice, filters, sort, page, limit } = req.body;
+
+        //console.log(req.body)
 
         const result = await productsService.searchProducts({
             category,
