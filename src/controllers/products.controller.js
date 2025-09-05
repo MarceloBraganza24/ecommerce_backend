@@ -1,4 +1,5 @@
 import * as productsService from '../services/products.service.js';
+import * as categoriesService from '../services/categories.service.js';
 import { ProductExists } from '../utils/custom.exceptions.js';
 
 const getAll = async (req, res) => {
@@ -26,6 +27,39 @@ const getDeleted = async (req, res) => {
         req.logger.error(error.message);
     }
 };
+
+// Helper recursivo para encontrar la raíz de una categoría
+async function getRootCategory(categoryId) {
+  let category = await categoriesService.getById(categoryId);
+  while (category && category.parent) {
+    category = await categoriesService.getById(category.parent);
+  }
+  return category;
+}
+
+const getFeatured = async (req, res) => {
+    try {
+        const featuredProducts = await productsService.getFeatured();
+
+        // Agrupar por categoría raíz
+        const grouped = {};
+        for (const product of featuredProducts) {
+            const rootCat = await getRootCategory(product.category._id);
+            const rootName = rootCat?.name || product.category.name;
+
+            if (!grouped[rootName]) {
+                grouped[rootName] = [];
+            }
+            grouped[rootName].push(product);
+        }
+
+        res.status(200).json({ status: 'success', payload: grouped });
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
+
 const searchProducts = async (req, res) => {
     try {
         const { category, minPrice, maxPrice, filters, sort, page, limit } = req.body;
@@ -176,7 +210,7 @@ const updateRestoreProduct = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const { title,description,price,stock,state,category } = req.body;
+        const { title,description,price,stock,state,category,isFeatured  } = req.body;
         const images = req.files;
         let propiedades = {};
         if (req.body.propiedades) {
@@ -200,7 +234,8 @@ const save = async (req, res) => {
             state,
             category,
             camposExtras: propiedades,
-            variantes
+            variantes,
+            isFeatured: isFeatured === 'true'
         });
         res.sendSuccessNewResourse(registeredProduct);
     } catch (error) {
@@ -211,7 +246,7 @@ const save = async (req, res) => {
 const update = async (req, res) => {
     try {
         const { pid } = req.params;
-        const { title, description, price, stock, state, category, propiedades, imagenesAnteriores } = req.body;
+        const { title, description, price, stock, state, category,isFeatured, propiedades, imagenesAnteriores } = req.body;
         const propiedadesParsed = JSON.parse(propiedades);
         const imagenesAnterioresParsed = JSON.parse(imagenesAnteriores);
         const imagenesAnterioresConPrefijo = imagenesAnterioresParsed.map(img => img.startsWith('uploads/') ? img : `uploads/${img}`);
@@ -229,6 +264,7 @@ const update = async (req, res) => {
             stock,
             state,
             category,
+            isFeatured: isFeatured === 'true',
             camposExtras: propiedadesParsed,
             images: imagenesFinales,
             variantes
@@ -345,6 +381,7 @@ export {
     getAll,
     searchProducts,
     getDeleted,
+    getFeatured,
     navbarSearch,
     getAllBy,
     updateRestoreProduct,

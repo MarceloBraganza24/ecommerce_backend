@@ -24,6 +24,10 @@ export default class ProductsRepository {
         const products = await this.dao.getDeleted(query);
         return products;
     }
+    getFeatured = async() => {
+        const products = await this.dao.getFeatured();
+        return products;
+    }
     getAllByPage = async(query, { page, limit }) => {
         const products = await this.dao.getAllByPage(query, { page, limit });
         return products;

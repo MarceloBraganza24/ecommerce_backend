@@ -16,13 +16,17 @@ export default class Products {
             : productsModel.findOne({ _id: pid });
         return await query;
     };
-    /* getDeleted = async (query) => {
-        const deletedProducts = await productsModel.find({ deleted: true }).lean();
-        return deletedProducts;
-    }; */
     getDeleted = async (query = { deleted: true }) => {
         return await productsModel.find(query).lean();
     };
+
+    getFeatured = async () => {
+        return await productsModel
+            .find({ isFeatured: true, deleted: false })
+            .populate("category")
+            .lean();
+    };
+
     groupedByCategory = async (limit) => {
         // Obtener las categorías distintas primero
         const categories = await productsModel.distinct('category', { deleted: false });

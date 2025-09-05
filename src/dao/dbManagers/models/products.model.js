@@ -42,6 +42,10 @@ const productsSchema = new mongoose.Schema({
         ref: 'categories',
         required: true
     },
+    isFeatured: {
+        type: Boolean,
+        default: false
+    },
     number_sales: {
         type: Number,
         default: 0,
