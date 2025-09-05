@@ -29,10 +29,20 @@ const getDeleted = async (req, res) => {
 };
 
 // Helper recursivo para encontrar la raíz de una categoría
-async function getRootCategory(categoryId) {
+/* async function getRootCategory(categoryId) {
   let category = await categoriesService.getById(categoryId);
   while (category && category.parent) {
     category = await categoriesService.getById(category.parent);
+  }
+  return category;
+} */
+/* async function getRootCategory(categoryId) {
+  let category = await categoriesService.getById(categoryId);
+  while (category && category.parent) {
+    // category.parent puede ser ObjectId o null
+    category = category.parent 
+      ? await categoriesService.getById(category.parent) 
+      : null;
   }
   return category;
 }
@@ -58,7 +68,43 @@ const getFeatured = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
+}; */
+async function getRootCategory(categoryId) {
+  if (!categoryId) return null; // <-- protección contra null
+
+  let category = await categoriesService.getById(categoryId);
+  while (category && category.parent) {
+    category = category.parent
+      ? await categoriesService.getById(category.parent)
+      : null;
+  }
+  return category;
+}
+
+const getFeatured = async (req, res) => {
+  try {
+    const featuredProducts = await productsService.getFeatured();
+
+    // Agrupar por categoría raíz
+    const grouped = {};
+    for (const product of featuredProducts) {
+      const catId = product.category?._id; // <-- acceso seguro
+      const rootCat = catId ? await getRootCategory(catId) : null;
+      const rootName = rootCat?.name || product.category?.name || "Sin categoría";
+
+      if (!grouped[rootName]) {
+        grouped[rootName] = [];
+      }
+      grouped[rootName].push(product);
+    }
+
+    res.status(200).json({ status: "success", payload: grouped });
+  } catch (error) {
+    res.sendServerError(error.message);
+    req.logger.error(error.message);
+  }
 };
+
 
 const searchProducts = async (req, res) => {
     try {

@@ -10,6 +10,7 @@ const categoriesSchema = new mongoose.Schema({
         default: null // null si es categoría raíz
     },
     description: { type: String },
+    image: { type: String, default: "" }
 });
 
 export const categoriesModel = mongoose.model(categoriesCollection, categoriesSchema);
