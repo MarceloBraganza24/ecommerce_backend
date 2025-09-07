@@ -80,7 +80,7 @@ const productsSchema = new mongoose.Schema({
     },
     deleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null }
-});
+}, { timestamps: true });
 
 productsSchema.plugin(mongoosePaginate);
 productsSchema.plugin(aggregatePaginate);

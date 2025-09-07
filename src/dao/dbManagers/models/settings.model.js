@@ -88,6 +88,16 @@ const settingsSchema = new mongoose.Schema({
             logo: { type: String, required: true }    // Ruta al logo (ej: "uploads/facebook.png")
         }],
         default: []
+    },
+    storeInfoBoxes: {
+        type: [
+            {
+                title: { type: String, required: true },
+                description: { type: String, required: true },
+                icon: { type: String, default: '' } // opcional si querés íconos
+            }
+        ],
+        default: []
     }
 }, {
     timestamps: true // Crea automáticamente createdAt y updatedAt

@@ -27,12 +27,14 @@ const getDeleted = async(query) => {
     const products = await productsRepository.getDeleted(query);
     return products;
 }
-
 const getFeatured = async() => {
     const products = await productsRepository.getFeatured();
     return products;
 }
-
+const getLatestNews = async() => {
+    const products = await productsRepository.getLatestNews();
+    return products;
+}
 const getAll = async() => {
     const products = await productsRepository.getAll();
     return products;
@@ -283,6 +285,7 @@ export {
     getById,
     getAll,
     getFeatured,
+    getLatestNews,
     navbarSearch,
     getByIdIncludeDeleted,
     updateSoftDelete,

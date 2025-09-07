@@ -14,7 +14,8 @@ export default class SettingsRouter extends Router {
                 { name: 'aboutImage', maxCount: 1 },
                 { name: 'contactImage', maxCount: 1 },
                 { name: 'sliderLogos', maxCount: 10 }, // si también estás enviando logos múltiples
-                { name: 'socialNetworkLogos', maxCount: 10 } // 👈 añadí esto
+                { name: 'socialNetworkLogos', maxCount: 10 }, // 👈 añadí esto
+                { name: 'storeInfoIcons', maxCount: 10 }
             ]),
             updateConfig
         );

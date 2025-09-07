@@ -104,6 +104,29 @@ const getFeatured = async (req, res) => {
     req.logger.error(error.message);
   }
 };
+const getLatestNews = async (req, res) => {
+  try {
+    const latestNewsProducts = await productsService.getLatestNews();
+
+    // Agrupar por categoría raíz
+    const grouped = {};
+    for (const product of latestNewsProducts) {
+      const catId = product.category?._id; // <-- acceso seguro
+      const rootCat = catId ? await getRootCategory(catId) : null;
+      const rootName = rootCat?.name || product.category?.name || "Sin categoría";
+
+      if (!grouped[rootName]) {
+        grouped[rootName] = [];
+      }
+      grouped[rootName].push(product);
+    }
+
+    res.status(200).json({ status: "success", payload: grouped });
+  } catch (error) {
+    res.sendServerError(error.message);
+    req.logger.error(error.message);
+  }
+};
 
 
 const searchProducts = async (req, res) => {
@@ -428,6 +451,7 @@ export {
     searchProducts,
     getDeleted,
     getFeatured,
+    getLatestNews,
     navbarSearch,
     getAllBy,
     updateRestoreProduct,

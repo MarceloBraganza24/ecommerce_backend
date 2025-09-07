@@ -26,6 +26,14 @@ export default class Products {
             .populate("category")
             .lean();
     };
+    getLatestNews = async () => {
+        return await productsModel
+            .find({ isFeatured: true, deleted: false })
+            .populate("category")
+            .sort({ createdAt: -1 })
+            .limit(15)
+            .lean();
+    };
 
     groupedByCategory = async (limit) => {
         // Obtener las categorías distintas primero

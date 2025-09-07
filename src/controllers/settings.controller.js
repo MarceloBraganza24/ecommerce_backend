@@ -19,6 +19,57 @@ export const updateConfig = async (req, res) => {
         // Traer config actual de BD
         const config = await settingsService.getConfig();
 
+        // === STORE INFO BOXES ===
+        const oldInfoBoxes = config.storeInfoBoxes || [];
+        const incomingInfoBoxes = parsedData.storeInfoBoxes || [];
+        const iconFiles = files['storeInfoIcons'] || [];
+
+        let updatedInfoBoxes = incomingInfoBoxes.map((box, index) => {
+            let iconPath = '';
+
+            if (typeof box.icon === 'string' && box.icon.startsWith('__upload__')) {
+                // Caso: archivo nuevo subido
+                const fileIndex = box.iconFileIndex ?? parseInt(box.icon.replace('__upload__', ''), 10);
+                const file = iconFiles[fileIndex];
+
+                if (file) {
+                    iconPath = path.join('uploads', file.filename).replace(/\\/g, '/');
+
+                    // Borrar ícono anterior si existía
+                    const oldPath = oldInfoBoxes[index]?.icon;
+                    if (oldPath && fs.existsSync(oldPath)) {
+                        fs.unlinkSync(oldPath);
+                    }
+                }
+            } else if (typeof box.icon === 'string' && box.icon.trim() !== '') {
+                // Mantener string válido
+                iconPath = box.icon;
+            } else if (oldInfoBoxes[index]?.icon) {
+                // Mantener el ícono viejo si no se envió nada
+                iconPath = oldInfoBoxes[index].icon;
+            }
+
+            return {
+                title: box.title || oldInfoBoxes[index]?.title || '',
+                description: box.description || oldInfoBoxes[index]?.description || '',
+                icon: iconPath
+            };
+        });
+
+        updatedInfoBoxes = updatedInfoBoxes.slice(0, 3);
+
+        // 🔴 Detectar boxes eliminados
+        const deletedBoxes = oldInfoBoxes.filter(
+            oldBox => !updatedInfoBoxes.some(newBox => newBox.icon === oldBox.icon)
+        );
+
+        // Borrar los archivos de los boxes eliminados
+        for (const box of deletedBoxes) {
+            if (box.icon && fs.existsSync(box.icon)) {
+                fs.unlinkSync(box.icon);
+            }
+        }
+
         // === SITE IMAGES ===
         const siteImageKeys = ['favicon', 'logoStore', 'homeImage', 'aboutImage', 'contactImage'];
         const updatedSiteImages = { ...config.siteImages };
@@ -118,7 +169,8 @@ export const updateConfig = async (req, res) => {
             siteImages: updatedSiteImages,
             offersSlider: updatedOffers,
             sliderLogos: updatedSliderLogos,
-            socialNetworks: updatedSocialNetworks
+            socialNetworks: updatedSocialNetworks,
+            storeInfoBoxes: updatedInfoBoxes
         };
 
         const updatedConfig = await settingsService.updateConfig(newSettings);

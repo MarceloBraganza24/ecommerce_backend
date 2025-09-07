@@ -28,6 +28,10 @@ export default class ProductsRepository {
         const products = await this.dao.getFeatured();
         return products;
     }
+    getLatestNews = async() => {
+        const products = await this.dao.getLatestNews();
+        return products;
+    }
     getAllByPage = async(query, { page, limit }) => {
         const products = await this.dao.getAllByPage(query, { page, limit });
         return products;

@@ -1,6 +1,6 @@
 import Router from "./router.js";
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
-import { getAll,getDeleted,getFeatured,navbarSearch,getAllByPage,searchProducts,getAllBy,getAvailableFilters, getById, save,massRestore,groupedByCategory,massDeletePermanent, update,updateSoftDelete,updateRestoreProduct,updatePricesByCategories,restorePricesByCategories, eliminate,massDelete } from '../controllers/products.controller.js'
+import { getAll,getDeleted,getFeatured,getLatestNews,navbarSearch,getAllByPage,searchProducts,getAllBy,getAvailableFilters, getById, save,massRestore,groupedByCategory,massDeletePermanent, update,updateSoftDelete,updateRestoreProduct,updatePricesByCategories,restorePricesByCategories, eliminate,massDelete } from '../controllers/products.controller.js'
 import uploader from "../utils/upload.js";
 
 export default class ProductsRouter extends Router {
@@ -9,6 +9,7 @@ export default class ProductsRouter extends Router {
         this.get('/deleted', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getDeleted);
         
         this.get('/featured', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getFeatured);
+        this.get('/latest-news', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getLatestNews);
 
         this.get('/grouped-by-category', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, groupedByCategory);
         this.get('/byPage', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, getAllByPage);
