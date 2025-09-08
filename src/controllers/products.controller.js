@@ -277,7 +277,7 @@ const updateRestoreProduct = async (req, res) => {
     }
 } 
 
-const save = async (req, res) => {
+/* const save = async (req, res) => {
     try {
         const { title,description,price,stock,state,category,isFeatured  } = req.body;
         const images = req.files;
@@ -311,8 +311,135 @@ const save = async (req, res) => {
         res.sendServerError(error.message);  
         req.logger.error(error.message);
     }
+}; */
+const save = async (req, res) => {
+    try {
+        const { title, description, price, stock, state, category, isFeatured } = req.body;
+        const images = req.files;
+
+        let propiedades = {};
+        if (req.body.propiedades) {
+            propiedades = JSON.parse(req.body.propiedades);
+
+            // 🔽 Solo keys en minúscula para propiedades
+            propiedades = Object.fromEntries(
+                Object.entries(propiedades).map(([key, value]) => [
+                    key.toLowerCase(),
+                    value
+                ])
+            );
+        }
+
+        let variantes = [];
+        if (req.body.variantes) {
+            variantes = JSON.parse(req.body.variantes);
+
+            // 🔽 También bajar keys en campos de cada variante
+            variantes = variantes.map(variant => ({
+                ...variant,
+                campos: Object.fromEntries(
+                    Object.entries(variant.campos || {}).map(([key, value]) => [
+                        key.toLowerCase(),
+                        value
+                    ])
+                )
+            }));
+        }
+
+        if (!title || !description || !state || !category || !images || images.length === 0) {
+            return res.status(400).json({ message: 'Faltan campos requeridos.' });
+        }
+
+        const imagePaths = images.map(file => file.path);
+
+        const registeredProduct = await productsService.save({
+            images: imagePaths,
+            title,
+            description,
+            price,
+            stock,
+            state,
+            category,
+            camposExtras: propiedades,
+            variantes,
+            isFeatured: isFeatured === 'true'
+        });
+
+        res.sendSuccessNewResourse(registeredProduct);
+    } catch (error) {
+        res.sendServerError(error.message);  
+        req.logger.error(error.message);
+    }
 };
+
 const update = async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const { title, description, price, stock, state, category, isFeatured, propiedades, imagenesAnteriores } = req.body;
+
+        // 🔽 Parseo y normalización de propiedades
+        let propiedadesParsed = {};
+        if (propiedades) {
+            propiedadesParsed = JSON.parse(propiedades);
+            propiedadesParsed = Object.fromEntries(
+                Object.entries(propiedadesParsed).map(([key, value]) => [
+                    key.toLowerCase(),
+                    value
+                ])
+            );
+        }
+
+        const imagenesAnterioresParsed = JSON.parse(imagenesAnteriores || "[]");
+        const imagenesAnterioresConPrefijo = imagenesAnterioresParsed.map(img =>
+            img.startsWith('uploads/') ? img : `uploads/${img}`
+        );
+
+        const nuevasImagenes = req.files.map(file => `uploads/${file.filename}`);
+        const imagenesFinales = [...imagenesAnterioresConPrefijo, ...nuevasImagenes];
+
+        // 🔽 Parseo y normalización de variantes
+        let variantes = [];
+        if (req.body.variantes) {
+            variantes = JSON.parse(req.body.variantes);
+            variantes = variantes.map(variant => ({
+                ...variant,
+                campos: Object.fromEntries(
+                    Object.entries(variant.campos || {}).map(([key, value]) => [
+                        key.toLowerCase(),
+                        value
+                    ])
+                )
+            }));
+        }
+
+        const updatedProduct = await productsService.update(pid, {
+            title,
+            description,
+            price,
+            stock,
+            state,
+            category,
+            isFeatured: isFeatured === 'true',
+            camposExtras: propiedadesParsed,
+            images: imagenesFinales,
+            variantes
+        });
+
+        if (!updatedProduct) {
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
+
+        res.sendSuccessNewResourse(updatedProduct);
+    } catch (error) {
+        if (error instanceof ProductExists) {
+            return res.sendClientError(error.message);
+        }
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
+};
+
+/* const update = async (req, res) => {
     try {
         const { pid } = req.params;
         const { title, description, price, stock, state, category,isFeatured, propiedades, imagenesAnteriores } = req.body;
@@ -350,7 +477,7 @@ const update = async (req, res) => {
         res.sendServerError(error.message);
         req.logger.error(error.message);
     }
-}
+} */
 const updatePricesByCategories = async (req, res) => {
     try {
         const { categories, percentage } = req.body;
